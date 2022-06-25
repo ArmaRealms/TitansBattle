@@ -1,22 +1,27 @@
 package me.roinujnosde.titansbattle.commands;
 
 import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.TitansBattle;
+import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.challenges.*;
+import me.roinujnosde.titansbattle.games.Game;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ChallengeManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
+import me.roinujnosde.titansbattle.utils.SoundUtils;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%titansbattle|tb")
-@Subcommand("%challenge|challenge")
+@CommandAlias("%x1clan|clanx1")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -46,8 +51,7 @@ public class ChallengeCommand extends BaseCommand {
         challenge.onJoin(challenger);
     }
 
-    @CommandAlias("x1clan")
-    @Subcommand("%group|group")
+    @Subcommand("%challenge|challenge")
     @CommandCompletion("@groups @arenas:group=true")
     @Conditions("can_challenge:group=true")
     @CommandPermission("titansbattle.challenge.group")
@@ -74,7 +78,6 @@ public class ChallengeCommand extends BaseCommand {
         challenge.onJoin(sender);
     }
     
-    @CommandAlias("x1clan")
     @Subcommand("%accept|accept")
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
@@ -88,5 +91,40 @@ public class ChallengeCommand extends BaseCommand {
         }
         challenger.getChallenge().onJoin(warrior);
     }
+    
+    @Subcommand("%exit|exit|leave")
+    @CommandPermission("titansbattle.challenge.exit")
+    @Conditions("participant")
+    @Description("{@@command.description.challenge.exit}")
+    public void leave(Player sender) {
+        Warrior warrior = databaseManager.getWarrior(sender);
+        //noinspection ConstantConditions
+        plugin.getBaseGameFrom(sender).onLeave(warrior);
+    }
 
+    @Subcommand("%watch|watch")
+    @CommandPermission("titansbattle.challenge.watch")
+    @CommandCompletion("@arenas:in_use")
+    @Description("{@@command.description.challenge.watch}")
+    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
+        BaseGameConfiguration config;
+        if (arena == null && game == null) {
+            sender.sendMessage(plugin.getLang("challenge.not-starting-or-started"));
+            return;
+        }
+        config = (arena == null) ? game.getConfig() : arena;
+
+        Location watchroom = config.getWatchroom();
+        sender.teleport(watchroom);
+        SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
+    }
+
+    @CatchUnknown
+    @Default
+    @HelpCommand("%help|help")
+    @Description("{@@command.description.help}")
+    @Syntax("{@@command.sintax.help}")
+    public void doHelp(CommandHelp help) {
+        help.showHelp();
+    }
 }

@@ -15,34 +15,40 @@ permissions:
     description: "Gives access to administrator commands"
     default: op
     children:
-      titansbattle.player: true
-      titansbattle.create: true
-      titansbattle.reload: true
       titansbattle.cancel: true
-      titansbattle.start: true
+      titansbattle.challenge.player: false
+      titansbattle.command-bypass: true
+      titansbattle.create: true
+      titansbattle.kick: true
+      titansbattle.player: true
+      titansbattle.ranking: true
+      titansbattle.reload: true
       titansbattle.setdestination: true
       titansbattle.setinventory: true
-      titansbattle.command-bypass: true
-      titansbattle.kick: true
       titansbattle.setwinner: true
+      titansbattle.start: true
+      titansbattle.winners: true
   titansbattle.player:
     description: "Gives access to player commands"
     default: false
     children:
-      titansbattle.join: true
-      titansbattle.exit: true
-      titansbattle.watchroom: true
-      titansbattle.help: true
-      titansbattle.winners: true
-      titansbattle.ranking: true
-      titansbattle.challenge.group: true
-      titansbattle.challenge.player: true
       titansbattle.challenge.accept: true
+      titansbattle.challenge.exit: true
+      titansbattle.challenge.group: true
+      titansbattle.challenge.watch: true
+      titansbattle.exit: true
+      titansbattle.help: true
+      titansbattle.join: true
+      titansbattle.watchroom: true
   titansbattle.challenge.accept:
     default: false
   titansbattle.challenge.player:
     default: false
   titansbattle.challenge.group:
+    default: false
+  titansbattle.challenge.watch:
+    default: false
+  titansbattle.challenge.exit:
     default: false
   titansbattle.join:
     default: false
