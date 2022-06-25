@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%challenge|challenge")
+@CommandAlias("%x1clan|clanx1")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -51,7 +51,7 @@ public class ChallengeCommand extends BaseCommand {
         challenge.onJoin(challenger);
     }
 
-    @Subcommand("%group|group")
+    @Subcommand("%challenge|challenge")
     @CommandCompletion("@groups @arenas:group=true")
     @Conditions("can_challenge:group=true")
     @CommandPermission("titansbattle.challenge.group")
@@ -123,7 +123,7 @@ public class ChallengeCommand extends BaseCommand {
     @Default
     @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
-    @Syntax("[filtro]")
+    @Syntax("{@@command.sintax.help}")
     public void doHelp(CommandHelp help) {
         help.showHelp();
     }
