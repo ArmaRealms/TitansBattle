@@ -7,7 +7,6 @@ import me.roinujnosde.titansbattle.events.PlayerWinEvent;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
