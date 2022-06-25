@@ -51,6 +51,7 @@ public class ChallengeCommand extends BaseCommand {
     @Conditions("can_challenge:group=true")
     @CommandPermission("titansbattle.challenge.group")
     @Description("{@@command.description.challenge.group}")
+    @CommandAlias("xclan")
     public void challengeGroup(Warrior sender, @Conditions("other") Group target,
             @Conditions("ready:group=true|empty_inventory") ArenaConfiguration arena) {
         Challenge challenge = new Challenge(plugin, arena);
