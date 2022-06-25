@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%titansbattle|tb")
+@CommandAlias("x1clan")
 @Subcommand("%challenge|challenge")
 public class ChallengeCommand extends BaseCommand {
 
@@ -47,7 +47,6 @@ public class ChallengeCommand extends BaseCommand {
     }
 
     @Subcommand("%group|group")
-    @CommandAlias("x1clan desafiar")
     @CommandCompletion("@groups @arenas:group=true")
     @Conditions("can_challenge:group=true")
     @CommandPermission("titansbattle.challenge.group")
@@ -75,7 +74,6 @@ public class ChallengeCommand extends BaseCommand {
     }
 
     @Subcommand("%accept|accept")
-    @CommandAlias("x1clan aceitar")
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
     @Description("{@@command.description.challenge.accept}")
