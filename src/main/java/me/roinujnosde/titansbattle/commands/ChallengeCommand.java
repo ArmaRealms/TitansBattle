@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.TitansBattle;
+import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.challenges.*;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ChallengeManager;
@@ -84,5 +85,31 @@ public class ChallengeCommand extends BaseCommand {
             return;
         }
         challenger.getChallenge().onJoin(warrior);
+    }
+
+    @Subcommand("%watch|watch")
+    @CommandPermission("titansbattle.challenge.watch")
+    @CommandCompletion("@arenas:in_use")
+    @Description("{@@command.description.watch}")
+    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
+        BaseGameConfiguration config;
+        if (arena == null && game == null) {
+            sender.sendMessage(plugin.getLang("challenge.not-starting-or-started"));
+            return;
+        }
+        config = (arena == null) ? game.getConfig() : arena;
+
+        Location watchroom = config.getWatchroom();
+        sender.teleport(watchroom);
+        SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
+    }
+
+    @Subcommand("%help|help")
+    @CatchUnknown
+    @Default
+    @Description("{@@command.description.help}")
+    @Syntax("{@@command.sintax.help}")
+    public void doHelp(CommandHelp help) {
+        help.showHelp();
     }
 }
