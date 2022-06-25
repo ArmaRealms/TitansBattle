@@ -482,22 +482,4 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(MessageFormat.format(plugin.getLang("winners", game),
                 new SimpleDateFormat(dateFormat).format(date), name, group, members));
     }
-
-    @Subcommand("%watch|watch")
-    @CommandPermission("titansbattle.watch")
-    @CommandCompletion("@arenas:in_use")
-    @Description("{@@command.description.watch}")
-    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
-        BaseGameConfiguration config;
-        if (arena == null && game == null) {
-            sender.sendMessage(plugin.getLang("not-starting-or-started"));
-            return;
-        }
-        config = (arena == null) ? game.getConfig() : arena;
-
-        Location watchroom = config.getWatchroom();
-        sender.teleport(watchroom);
-        SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
-    }
-
 }
