@@ -38,7 +38,7 @@ public class ConfigCommands extends BaseCommand {
 
     @Subcommand("%setdestination|setdestination GENERAL_EXIT")
     @CommandPermission("titansbattle.setdestination")
-    @Description("{@@command.description.setgeneralexit}")
+    @Description("{@@command.description.setdestination.general}")
     public void setGeneralExit(Player player) {
         configManager.setGeneralExit(player.getLocation());
         configManager.save();
@@ -185,7 +185,7 @@ public class ConfigCommands extends BaseCommand {
         @Subcommand("%setdestination|setdestination")
         @CommandPermission("titansbattle.setdestination")
         @CommandCompletion("@games @destinations|ARENA_ENTRANCE")
-        @Description("{@@command.description.setdestination}")
+        @Description("{@@command.description.setdestination.others}")
         public void setDestination(Player player,
                                   @Values("@games") GameConfiguration game,
                                   @Values("@destinations") Destination destination) {
@@ -195,7 +195,7 @@ public class ConfigCommands extends BaseCommand {
         @Subcommand("%setdestination|setdestination")
         @CommandPermission("titansbattle.setdestination")
         @CommandCompletion("@games @destinations|ARENA_ENTRANCE @range:1-2")
-        @Description("{@@command.description.setdestination}")
+        @Description("{@@command.description.setdestination.others}")
         public void setArenaEntrance(Player player,
                                      @Values("@games") GameConfiguration game,
                                      @Values("ARENA_ENTRANCE") String destination,
