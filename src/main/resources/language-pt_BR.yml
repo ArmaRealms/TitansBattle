@@ -24,6 +24,8 @@ command.description.challenge.create: "Cria um arquivo de configuração de desa
 command.description.challenge.setdestination: "Define um destino para um desafio"
 command.description.challenge.setkit: "Define seu inventário como o kit de um desafio"
 command.syntax.help: "[página ou filtro]"
+command.sintax.challenge.group: "[clã] [arena]"
+command.sintax.challenge.accept: "[clã]"
 group.not.found: "&c» Grupo não encontrado!"
 you.must.be.in.a.group.to.challenge: "&c» Você precisa estar em um grupo para desafiar outro grupo!"
 challenged.you: "&a» {0} desafiou você para um duelo! Aceite usando /tb challenge accept {0}"

@@ -17,6 +17,7 @@ import java.util.Set;
 
 @CommandAlias("%titansbattle|tb")
 @Subcommand("%challenge|challenge")
+@CommandAlias("x1clan")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -51,7 +52,7 @@ public class ChallengeCommand extends BaseCommand {
     @Conditions("can_challenge:group=true")
     @CommandPermission("titansbattle.challenge.group")
     @Description("{@@command.description.challenge.group}")
-    @CommandAlias("xclan")
+    @Syntax("{@@command.sintax.challenge.group}")
     public void challengeGroup(Warrior sender, @Conditions("other") Group target,
             @Conditions("ready:group=true|empty_inventory") ArenaConfiguration arena) {
         Challenge challenge = new Challenge(plugin, arena);
@@ -77,6 +78,7 @@ public class ChallengeCommand extends BaseCommand {
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
     @Description("{@@command.description.challenge.accept}")
+    @Syntax("{@@command.sintax.challenge.accept}")
     public void accept(@Conditions("is_invited") Warrior warrior, @Optional @Values("@requests") ChallengeRequest<?> challenger) {
         if (challenger == null) {
             List<ChallengeRequest<?>> requests = challengeManager.getRequestsByInvited(warrior);
