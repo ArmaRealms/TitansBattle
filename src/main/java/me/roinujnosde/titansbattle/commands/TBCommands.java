@@ -482,7 +482,6 @@ public class TBCommands extends BaseCommand {
                 new SimpleDateFormat(dateFormat).format(date), name, group, members));
     }
 
-    @CommandAlias("%watch|watch")
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.watch")
     @Description("{@@command.description.watch}")
@@ -492,6 +491,7 @@ public class TBCommands extends BaseCommand {
             sender.sendMessage(plugin.getLang("not-starting-or-started"));
             return;
         }
+        config = game.getConfig();
 
         Location watchroom = config.getWatchroom();
         sender.teleport(watchroom);

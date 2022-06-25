@@ -1,16 +1,21 @@
 package me.roinujnosde.titansbattle.commands;
 
 import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.challenges.*;
+import me.roinujnosde.titansbattle.games.Game;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ChallengeManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
+import me.roinujnosde.titansbattle.utils.SoundUtils;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Objects;
@@ -90,7 +95,7 @@ public class ChallengeCommand extends BaseCommand {
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.challenge.watch")
     @CommandCompletion("@arenas:in_use")
-    @Description("{@@command.description.watch}")
+    @Description("{@@command.description.challenge.watch}")
     public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
         BaseGameConfiguration config;
         if (arena == null && game == null) {
