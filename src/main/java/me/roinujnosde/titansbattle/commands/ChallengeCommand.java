@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%titansbattle|tb")
-@Subcommand("%challenge|challenge")
+@CommandAlias("%challenge|challenge")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -46,7 +45,6 @@ public class ChallengeCommand extends BaseCommand {
         challenge.onJoin(challenger);
     }
 
-    @CommandAlias("x1clan")
     @Subcommand("%group|group")
     @CommandCompletion("@groups @arenas:group=true")
     @Conditions("can_challenge:group=true")
@@ -74,7 +72,6 @@ public class ChallengeCommand extends BaseCommand {
         challenge.onJoin(sender);
     }
     
-    @CommandAlias("x1clan")
     @Subcommand("%accept|accept")
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
@@ -89,4 +86,20 @@ public class ChallengeCommand extends BaseCommand {
         challenger.getChallenge().onJoin(warrior);
     }
 
+    @Subcommand("%watch|watch")
+    @CommandPermission("titansbattle.challenge.watch")
+    @CommandCompletion("@arenas:in_use")
+    @Description("{@@command.description.watch}")
+    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
+        BaseGameConfiguration config;
+        if (arena == null && game == null) {
+            sender.sendMessage(plugin.getLang("challenge.not-starting-or-started"));
+            return;
+        }
+        config = (arena == null) ? game.getConfig() : arena;
+
+        Location watchroom = config.getWatchroom();
+        sender.teleport(watchroom);
+        SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
+    }
 }
