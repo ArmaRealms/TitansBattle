@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+@CommandAlias("%titansbattle|tb")
 @Subcommand("%challenge|challenge")
-@CommandAlias("x1clan")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency

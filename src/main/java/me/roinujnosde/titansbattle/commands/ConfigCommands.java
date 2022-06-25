@@ -206,6 +206,7 @@ public class ConfigCommands extends BaseCommand {
     }
 
     @Subcommand("%challenge|challenge")
+    @CommandAlias("x1clan")
     public class ArenaCommand extends BaseCommand {
 
         @Subcommand("%create|create")
