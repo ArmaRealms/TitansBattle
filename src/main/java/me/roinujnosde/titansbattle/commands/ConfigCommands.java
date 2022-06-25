@@ -38,7 +38,7 @@ public class ConfigCommands extends BaseCommand {
 
     @Subcommand("%setdestination|setdestination GENERAL_EXIT")
     @CommandPermission("titansbattle.setdestination")
-    @Description("{@@command.description.setdestination.general}")
+    @Description("{@@command.description.setgeneralexit}")
     public void setGeneralExit(Player player) {
         configManager.setGeneralExit(player.getLocation());
         configManager.save();

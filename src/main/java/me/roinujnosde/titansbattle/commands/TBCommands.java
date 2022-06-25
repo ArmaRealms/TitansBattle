@@ -136,7 +136,7 @@ public class TBCommands extends BaseCommand {
     @CatchUnknown
     @Default
     @Description("{@@command.description.help}")
-    @Syntax("{@@command.description.help.sintax}")
+    @Syntax("{@@command.sintax.help}")
     public void doHelp(CommandHelp help) {
         help.showHelp();
     }
