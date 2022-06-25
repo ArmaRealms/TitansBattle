@@ -131,9 +131,9 @@ public class TBCommands extends BaseCommand {
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
 
-    @Subcommand("%help|help")
-    @CatchUnknown
     @Default
+    @CatchUnknown
+    @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
     @Syntax("{@@command.sintax.help}")
     public void doHelp(CommandHelp help) {
@@ -497,21 +497,4 @@ public class TBCommands extends BaseCommand {
         sender.teleport(watchroom);
         SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
     }
-
-    // @Subcommand("%watch|watch")
-    // @CommandPermission("titansbattle.challenge.watch")
-    // @CommandCompletion("@arenas:in_use")
-    // @Description("{@@command.description.watch}")
-    // public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
-    //     BaseGameConfiguration config;
-    //     if (arena == null && game == null) {
-    //         sender.sendMessage(plugin.getLang("challenge.not-starting-or-started"));
-    //         return;
-    //     }
-    //     config = (arena == null) ? game.getConfig() : arena;
-
-    //     Location watchroom = config.getWatchroom();
-    //     sender.teleport(watchroom);
-    //     SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
-    // }
 }

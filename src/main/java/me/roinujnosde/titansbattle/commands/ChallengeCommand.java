@@ -91,6 +91,16 @@ public class ChallengeCommand extends BaseCommand {
         }
         challenger.getChallenge().onJoin(warrior);
     }
+    
+    @Subcommand("%exit|exit|leave")
+    @CommandPermission("titansbattle.challenge.exit")
+    @Conditions("participant")
+    @Description("{@@command.description.challenge.exit}")
+    public void leave(Player sender) {
+        Warrior warrior = databaseManager.getWarrior(sender);
+        //noinspection ConstantConditions
+        plugin.getBaseGameFrom(sender).onLeave(warrior);
+    }
 
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.challenge.watch")
@@ -109,11 +119,11 @@ public class ChallengeCommand extends BaseCommand {
         SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
     }
 
-    @Subcommand("%help|help")
     @CatchUnknown
     @Default
+    @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
-    @Syntax("{@@command.sintax.help}")
+    @Syntax("[filtro]")
     public void doHelp(CommandHelp help) {
         help.showHelp();
     }
