@@ -79,6 +79,7 @@ public class ChallengeCommand extends BaseCommand {
     }
     
     @Subcommand("%accept|accept")
+    @Default
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
     @Description("{@@command.description.challenge.accept}")

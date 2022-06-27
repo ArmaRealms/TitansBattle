@@ -113,6 +113,7 @@ public class TBCommands extends BaseCommand {
     }
 
     @Subcommand("%join|join")
+    @Default
     @CommandPermission("titansbattle.join")
     @Conditions("happening")
     @Description("{@@command.description.join}")
@@ -482,6 +483,7 @@ public class TBCommands extends BaseCommand {
                 new SimpleDateFormat(dateFormat).format(date), name, group, members));
     }
 
+    @CommandAlias("%watch|watch")
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.watch")
     @Description("{@@command.description.watch}")
