@@ -112,8 +112,8 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(plugin.getLang("configuration-reloaded"));
     }
 
-    @Subcommand("%join|join")
     @Default
+    @Subcommand("%join|join")
     @CommandPermission("titansbattle.join")
     @Conditions("happening")
     @Description("{@@command.description.join}")
@@ -132,7 +132,6 @@ public class TBCommands extends BaseCommand {
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
 
-    @Default
     @CatchUnknown
     @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
