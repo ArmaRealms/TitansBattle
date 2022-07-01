@@ -496,6 +496,7 @@ public class TBCommands extends BaseCommand {
 
         Location watchroom = config.getWatchroom();
         sender.teleport(watchroom);
+        sender.sendMessage(plugin.getLang("teleport-watchroom"));
         SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
     }
 }
