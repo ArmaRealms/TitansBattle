@@ -112,6 +112,7 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(plugin.getLang("configuration-reloaded"));
     }
 
+    @Default
     @Subcommand("%join|join")
     @CommandPermission("titansbattle.join")
     @Conditions("happening")
@@ -131,7 +132,6 @@ public class TBCommands extends BaseCommand {
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
 
-    @Default
     @CatchUnknown
     @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
@@ -482,6 +482,7 @@ public class TBCommands extends BaseCommand {
                 new SimpleDateFormat(dateFormat).format(date), name, group, members));
     }
 
+    @CommandAlias("%watch|watch")
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.watch")
     @Description("{@@command.description.watch}")

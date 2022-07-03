@@ -78,6 +78,7 @@ public class ChallengeCommand extends BaseCommand {
         challenge.onJoin(sender);
     }
     
+    @Default
     @Subcommand("%accept|accept")
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
@@ -120,7 +121,6 @@ public class ChallengeCommand extends BaseCommand {
     }
 
     @CatchUnknown
-    @Default
     @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
     @Syntax("{@@command.sintax.help}")
