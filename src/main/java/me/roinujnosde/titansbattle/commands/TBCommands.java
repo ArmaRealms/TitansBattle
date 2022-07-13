@@ -134,7 +134,7 @@ public class TBCommands extends BaseCommand {
     }
 
     @Subcommand("%help|help")
-    @Syntax(" [filtro]")
+    @Syntax("[filtro]")
     @CatchUnknown
     @Description("{@@command.description.help}")
     public void doHelp(CommandHelp help) {
