@@ -48,7 +48,7 @@ public class ChallengeCommand extends BaseCommand {
 
         challenger.sendMessage(plugin.getLang("you.challenged.player", challenge, target.player.getName()));
         target.player.sendMessage(plugin.getLang("challenged.you", challenge, challenger.getName()));
-        challenge.onJoin(challenger);
+        challenge.onChallengeJoin(challenger);
     }
 
     @Subcommand("%challenge|challenge")
@@ -75,7 +75,7 @@ public class ChallengeCommand extends BaseCommand {
         Set<Warrior> members = plugin.getGroupManager().getWarriors(challenger);
         members.remove(sender);
         members.forEach(w -> w.sendMessage(msgOwn));
-        challenge.onJoin(sender);
+        challenge.onChallengeJoin(sender);
     }
     
     @Default
@@ -87,10 +87,20 @@ public class ChallengeCommand extends BaseCommand {
     public void accept(@Conditions("is_invited") Warrior warrior, @Optional @Values("@requests") ChallengeRequest<?> challenger) {
         if (challenger == null) {
             List<ChallengeRequest<?>> requests = challengeManager.getRequestsByInvited(warrior);
-            requests.get(requests.size() - 1).getChallenge().onJoin(warrior);
+            requests.get(requests.size() - 1).getChallenge().onChallengeJoin(warrior);
             return;
         }
-        challenger.getChallenge().onJoin(warrior);
+        challenger.getChallenge().onChallengeJoin(warrior);
+    }
+    
+    @Subcommand("%exit|exit|leave")
+    @CommandPermission("titansbattle.challenge.exit")
+    @Conditions("participant")
+    @Description("{@@command.description.challenge.exit}")
+    public void leave(Player sender) {
+        Warrior warrior = databaseManager.getWarrior(sender);
+        //noinspection ConstantConditions
+        plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
     
     @Subcommand("%exit|exit|leave")
@@ -117,6 +127,7 @@ public class ChallengeCommand extends BaseCommand {
 
         Location watchroom = config.getWatchroom();
         sender.teleport(watchroom);
+        sender.sendMessage(plugin.getLang("challenge.teleport-watchroom"));
         SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
     }
 
