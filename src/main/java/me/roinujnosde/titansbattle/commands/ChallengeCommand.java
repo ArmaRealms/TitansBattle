@@ -102,6 +102,16 @@ public class ChallengeCommand extends BaseCommand {
         //noinspection ConstantConditions
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
+    
+    @Subcommand("%exit|exit|leave")
+    @CommandPermission("titansbattle.challenge.exit")
+    @Conditions("participant")
+    @Description("{@@command.description.challenge.exit}")
+    public void leave(Player sender) {
+        Warrior warrior = databaseManager.getWarrior(sender);
+        //noinspection ConstantConditions
+        plugin.getBaseGameFrom(sender).onLeave(warrior);
+    }
 
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.challenge.watch")
