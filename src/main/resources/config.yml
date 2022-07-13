@@ -22,6 +22,7 @@ commands:
     accept: "accept"
     cancel: "cancel"
     challenge: "desafiar"
+    clanx1: "clanx1"
     config: "config"
     create: "create"
     deny: "deny"
@@ -50,7 +51,6 @@ commands:
     titansbattle: "titansbattle"
     watch: "watch"
     winners: "winners"
-    x1clan: "x1clan"
 
 #Sounds used in games, to disable one leave it ""
 sounds:

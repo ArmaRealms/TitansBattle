@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%x1clan|clanx1")
+@CommandAlias("%clanx1|clanx1")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -77,7 +77,7 @@ public class ChallengeCommand extends BaseCommand {
         members.forEach(w -> w.sendMessage(msgOwn));
         challenge.onChallengeJoin(sender);
     }
-    
+
     @Default
     @Subcommand("%accept|accept")
     @CommandCompletion("@requests")
@@ -92,17 +92,7 @@ public class ChallengeCommand extends BaseCommand {
         }
         challenger.getChallenge().onChallengeJoin(warrior);
     }
-    
-    @Subcommand("%exit|exit|leave")
-    @CommandPermission("titansbattle.challenge.exit")
-    @Conditions("participant")
-    @Description("{@@command.description.challenge.exit}")
-    public void leave(Player sender) {
-        Warrior warrior = databaseManager.getWarrior(sender);
-        //noinspection ConstantConditions
-        plugin.getBaseGameFrom(sender).onLeave(warrior);
-    }
-    
+
     @Subcommand("%exit|exit|leave")
     @CommandPermission("titansbattle.challenge.exit")
     @Conditions("participant")
