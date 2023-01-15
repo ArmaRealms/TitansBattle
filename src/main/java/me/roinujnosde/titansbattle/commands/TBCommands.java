@@ -112,6 +112,7 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(plugin.getLang("configuration-reloaded"));
     }
 
+    @Default
     @Subcommand("%join|join")
     @CommandPermission("titansbattle.join")
     @Conditions("happening")
@@ -132,8 +133,8 @@ public class TBCommands extends BaseCommand {
     }
 
     @Subcommand("%help|help")
+    @Syntax("[filtro]")
     @CatchUnknown
-    @Default
     @Description("{@@command.description.help}")
     public void doHelp(CommandHelp help) {
         help.showHelp();
@@ -480,7 +481,8 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(MessageFormat.format(plugin.getLang("winners", game),
                 new SimpleDateFormat(dateFormat).format(date), name, group, members));
     }
-
+    
+    @CommandAlias("%watch")
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.watch")
     @CommandCompletion("@arenas:in_use")
