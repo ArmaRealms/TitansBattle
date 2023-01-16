@@ -46,7 +46,7 @@ public class PlayerDeathListener extends TBListener {
         super(plugin);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onDeath(PlayerDeathEvent event) {
         GameManager gm = plugin.getGameManager();
         DatabaseManager databaseManager = plugin.getDatabaseManager();
