@@ -6,7 +6,6 @@ import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.exceptions.CommandNotSupportedException;
 import me.roinujnosde.titansbattle.games.Game;
@@ -112,6 +111,7 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(plugin.getLang("configuration-reloaded"));
     }
 
+    @Default
     @Subcommand("%join|join")
     @CommandPermission("titansbattle.join")
     @Conditions("happening")
@@ -131,10 +131,10 @@ public class TBCommands extends BaseCommand {
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
 
-    @Subcommand("%help|help")
     @CatchUnknown
-    @Default
+    @HelpCommand("%help|help")
     @Description("{@@command.description.help}")
+    @Syntax("{@@command.sintax.help}")
     public void doHelp(CommandHelp help) {
         help.showHelp();
     }
@@ -481,21 +481,21 @@ public class TBCommands extends BaseCommand {
                 new SimpleDateFormat(dateFormat).format(date), name, group, members));
     }
 
+    @CommandAlias("%watch|watch")
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.watch")
-    @CommandCompletion("@arenas:in_use")
     @Description("{@@command.description.watch}")
-    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
+    public void watch(Player sender, Game game) {
         BaseGameConfiguration config;
-        if (arena == null && game == null) {
+        if (game == null) {
             sender.sendMessage(plugin.getLang("not-starting-or-started"));
             return;
         }
-        config = (arena == null) ? game.getConfig() : arena;
+        config = game.getConfig();
 
         Location watchroom = config.getWatchroom();
         sender.teleport(watchroom);
+        sender.sendMessage(plugin.getLang("teleport-watchroom"));
         SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
     }
-
 }

@@ -5,6 +5,7 @@ import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.types.Warrior;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +15,7 @@ public class PlayerRespawnListener extends TBListener {
         super(plugin);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onRespawn(PlayerRespawnEvent event) {
         final Warrior warrior = plugin.getDatabaseManager().getWarrior(event.getPlayer());
 

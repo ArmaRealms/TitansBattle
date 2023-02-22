@@ -130,6 +130,31 @@ public abstract class BaseGame {
         }
     }
 
+    public void onChallengeJoin(@NotNull Warrior warrior) {
+        if (!canJoin(warrior)) {
+            plugin.debug(String.format("Warrior %s can't join", warrior.getName()));
+            return;
+        }
+        Player player = warrior.toOnlinePlayer();
+        if (player == null) {
+            plugin.debug(String.format("onChallengeJoin() -> player %s %s == null", warrior.getName(), warrior.getUniqueId()));
+            return;
+        }
+        if (!teleport(warrior, getConfig().getLobby())) {
+            plugin.debug(String.format("Player %s is dead: %s", player, player.isDead()), false);
+            player.sendMessage(getLang("teleport.error"));
+            return;
+        }
+        SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
+        participants.add(warrior);
+        setKit(warrior);
+        broadcastKey("challenge.player_joined", player.getName());
+        player.sendMessage(getLang("objective"));
+        if (participants.size() == getConfig().getMaximumPlayers() && lobbyTask != null) {
+            lobbyTask.processEnd();
+        }
+    }
+
     public void onDeath(@NotNull Warrior victim, @Nullable Warrior killer) {
         if (!isParticipant(victim)) {
             return;

@@ -3,7 +3,6 @@ package me.roinujnosde.titansbattle.commands.conditions;
 import co.aikar.commands.*;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
-import me.roinujnosde.titansbattle.commands.conditions.AbstractParameterCondition;
 import me.roinujnosde.titansbattle.types.Kit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

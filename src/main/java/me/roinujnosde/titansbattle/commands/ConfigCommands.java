@@ -185,15 +185,17 @@ public class ConfigCommands extends BaseCommand {
         @Subcommand("%setdestination|setdestination")
         @CommandPermission("titansbattle.setdestination")
         @CommandCompletion("@games @destinations|ARENA_ENTRANCE")
-        @Description("{@@command.description.setdestination}")
-        public void setDestination(Player player, @Values("@games") GameConfiguration game,  @Values("@destinations") Destination destination) {
+        @Description("{@@command.description.setdestination.others}")
+        public void setDestination(Player player,
+                                  @Values("@games") GameConfiguration game,
+                                  @Values("@destinations") Destination destination) {
             ConfigCommands.this.setDestination(player, game, destination);
         }
 
         @Subcommand("%setdestination|setdestination")
         @CommandPermission("titansbattle.setdestination")
         @CommandCompletion("@games @destinations|ARENA_ENTRANCE @range:1-2")
-        @Description("{@@command.description.setdestination}")
+        @Description("{@@command.description.setdestination.others}")
         public void setArenaEntrance(Player player,
                                      @Values("@games") GameConfiguration game,
                                      @Values("ARENA_ENTRANCE") String destination,
