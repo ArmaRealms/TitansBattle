@@ -195,8 +195,6 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-    <name>TitansBattle</name>
-
     <distributionManagement>
         <repository>
             <id>reposilite</id>
