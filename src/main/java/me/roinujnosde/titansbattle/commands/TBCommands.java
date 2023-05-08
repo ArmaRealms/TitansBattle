@@ -216,7 +216,7 @@ public class TBCommands extends BaseCommand {
         }
 
         private int getNickSize(final List<Warrior> warriors) {
-            int nickSize = warriors.stream().mapToInt(w -> w.toPlayer().getName().length()).max().orElse(0);
+            int nickSize = warriors.stream().mapToInt(w -> w.getName().length()).max().orElse(0);
             if (getNicknameTitle().length() > nickSize) {
                 nickSize = getNicknameTitle().length();
             }
@@ -341,7 +341,7 @@ public class TBCommands extends BaseCommand {
         }
 
         private String makeWarriorLine(String line, int pos, Warrior w, String game, List<Warrior> warriors) {
-            String name = w.toPlayer().getName();
+            String name = w.getName();
             int victories = w.getVictories(game);
             int kills = w.getKills(game);
             int deaths = w.getDeaths(game);
@@ -470,7 +470,7 @@ public class TBCommands extends BaseCommand {
         if (uuid == null) {
             name = plugin.getLang("winners-no-killer", game);
         } else {
-            name = Bukkit.getOfflinePlayer(uuid).getName();
+            name = databaseManager.getWarrior(uuid).getName();
         }
 
         String group = winners.getWinnerGroup(game.getName());
