@@ -1,22 +1,27 @@
 package me.roinujnosde.titansbattle.commands;
 
 import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.TitansBattle;
+import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.challenges.*;
+import me.roinujnosde.titansbattle.games.Game;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ChallengeManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
+import me.roinujnosde.titansbattle.utils.SoundUtils;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%titansbattle|tb")
-@Subcommand("%challenge|challenge")
+@CommandAlias("%clanx1|clanx1")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -43,14 +48,15 @@ public class ChallengeCommand extends BaseCommand {
 
         challenger.sendMessage(plugin.getLang("you.challenged.player", challenge, target.player.getName()));
         target.player.sendMessage(plugin.getLang("challenged.you", challenge, challenger.getName()));
-        challenge.onJoin(challenger);
+        challenge.onChallengeJoin(challenger);
     }
 
-    @Subcommand("%group|group")
+    @Subcommand("%challenge|challenge")
     @CommandCompletion("@groups @arenas:group=true")
     @Conditions("can_challenge:group=true")
     @CommandPermission("titansbattle.challenge.group")
     @Description("{@@command.description.challenge.group}")
+    @Syntax("{@@command.sintax.challenge.group}")
     public void challengeGroup(Warrior sender, @Conditions("other") Group target,
             @Conditions("ready:group=true|empty_inventory") ArenaConfiguration arena) {
         Challenge challenge = new Challenge(plugin, arena);
@@ -69,20 +75,57 @@ public class ChallengeCommand extends BaseCommand {
         Set<Warrior> members = plugin.getGroupManager().getWarriors(challenger);
         members.remove(sender);
         members.forEach(w -> w.sendMessage(msgOwn));
-        challenge.onJoin(sender);
+        challenge.onChallengeJoin(sender);
     }
 
+    @Default
     @Subcommand("%accept|accept")
     @CommandCompletion("@requests")
     @CommandPermission("titansbattle.challenge.accept")
     @Description("{@@command.description.challenge.accept}")
+    @Syntax("{@@command.sintax.challenge.accept}")
     public void accept(@Conditions("is_invited") Warrior warrior, @Optional @Values("@requests") ChallengeRequest<?> challenger) {
         if (challenger == null) {
             List<ChallengeRequest<?>> requests = challengeManager.getRequestsByInvited(warrior);
-            requests.get(requests.size() - 1).getChallenge().onJoin(warrior);
+            requests.get(requests.size() - 1).getChallenge().onChallengeJoin(warrior);
             return;
         }
-        challenger.getChallenge().onJoin(warrior);
+        challenger.getChallenge().onChallengeJoin(warrior);
     }
 
+    @Subcommand("%exit|exit|leave")
+    @CommandPermission("titansbattle.challenge.exit")
+    @Conditions("participant")
+    @Description("{@@command.description.challenge.exit}")
+    public void leave(Player sender) {
+        Warrior warrior = databaseManager.getWarrior(sender);
+        //noinspection ConstantConditions
+        plugin.getBaseGameFrom(sender).onLeave(warrior);
+    }
+
+    @Subcommand("%watch|watch")
+    @CommandPermission("titansbattle.challenge.watch")
+    @CommandCompletion("@arenas:in_use")
+    @Description("{@@command.description.challenge.watch}")
+    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
+        BaseGameConfiguration config;
+        if (arena == null && game == null) {
+            sender.sendMessage(plugin.getLang("challenge.not-starting-or-started"));
+            return;
+        }
+        config = (arena == null) ? game.getConfig() : arena;
+
+        Location watchroom = config.getWatchroom();
+        sender.teleport(watchroom);
+        sender.sendMessage(plugin.getLang("challenge.teleport-watchroom"));
+        SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
+    }
+
+    @CatchUnknown
+    @HelpCommand("%help|help")
+    @Description("{@@command.description.help}")
+    @Syntax("{@@command.sintax.help}")
+    public void doHelp(CommandHelp help) {
+        help.showHelp();
+    }
 }
