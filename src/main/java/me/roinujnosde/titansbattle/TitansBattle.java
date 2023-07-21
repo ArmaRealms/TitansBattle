@@ -270,7 +270,7 @@ public final class TitansBattle extends JavaPlugin {
 
     private void disableAsyncTask() {
         for (BukkitWorker worker : getServer().getScheduler().getActiveWorkers()) {
-            if (worker.getOwner().getName().equalsIgnoreCase(this.getName())) {
+            if (worker.getOwner() == this) {
                 worker.getThread().interrupt();
             }
         }
