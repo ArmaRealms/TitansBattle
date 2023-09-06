@@ -120,7 +120,6 @@ public final class TitansBattle extends JavaPlugin {
         challengeManager.getChallenges().forEach(c -> c.cancel(Bukkit.getConsoleSender()));
         gameManager.getCurrentGame().ifPresent(g -> g.cancel(Bukkit.getConsoleSender()));
         databaseManager.close();
-        disableAsyncTask();
     }
 
     public static TitansBattle getInstance() {
@@ -266,14 +265,6 @@ public final class TitansBattle extends JavaPlugin {
                 }
             }
         });
-    }
-
-    private void disableAsyncTask() {
-        for (BukkitWorker worker : getServer().getScheduler().getActiveWorkers()) {
-            if (worker.getOwner() == this) {
-                worker.getThread().interrupt();
-            }
-        }
     }
 
 }
