@@ -39,6 +39,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitWorker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,7 +98,7 @@ public final class TitansBattle extends JavaPlugin {
         Warrior warrior = getDatabaseManager().getWarrior(player);
 
         Optional<Game> currentGame = getGameManager().getCurrentGame();
-        if (currentGame.isPresent() && currentGame.get().isParticipant(warrior)) {
+        if (currentGame.isPresent() && (currentGame.get().isParticipant(warrior))) {
             return currentGame.get();
         }
         List<ChallengeRequest<?>> requests = getChallengeManager().getRequests();

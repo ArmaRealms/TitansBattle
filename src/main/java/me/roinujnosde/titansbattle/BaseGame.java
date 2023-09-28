@@ -129,6 +129,31 @@ public abstract class BaseGame {
         }
     }
 
+    public void onChallengeJoin(@NotNull Warrior warrior) {
+        if (!canJoin(warrior)) {
+            plugin.debug(String.format("Warrior %s can't join", warrior.getName()));
+            return;
+        }
+        Player player = warrior.toOnlinePlayer();
+        if (player == null) {
+            plugin.debug(String.format("onChallengeJoin() -> player %s %s == null", warrior.getName(), warrior.getUniqueId()));
+            return;
+        }
+        if (!teleport(warrior, getConfig().getLobby())) {
+            plugin.debug(String.format("Player %s is dead: %s", player, player.isDead()), false);
+            player.sendMessage(getLang("teleport.error"));
+            return;
+        }
+        SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
+        participants.add(warrior);
+        setKit(warrior);
+        broadcastKey("challenge.player_joined", player.getName());
+        player.sendMessage(getLang("objective"));
+        if (participants.size() == getConfig().getMaximumPlayers() && lobbyTask != null) {
+            lobbyTask.processEnd();
+        }
+    }
+
     public void onDeath(@NotNull Warrior victim, @Nullable Warrior killer) {
         if (!isParticipant(victim)) {
             return;
@@ -478,18 +503,16 @@ public abstract class BaseGame {
 
     protected void sendRemainingOpponentsCount() {
         getPlayerParticipantsStream().forEach(p -> {
-            int remaining = getRemainingOpponents(p);
-            if (remaining <= 0) {
+            int remainingPlayers = getRemainingOpponents();
+            int remainingGroups = getRemainingOpponentGroups(p);
+            if (Math.min(remainingPlayers, remainingGroups) <= 0) {
                 return;
             }
-            MessageUtils.sendActionBar(p, MessageFormat.format(getLang("action-bar-remaining-opponents"), remaining));
+            MessageUtils.sendActionBar(p, MessageFormat.format(getLang("action-bar-remaining-opponents"), remainingPlayers, remainingGroups));
         });
     }
 
-    protected int getRemainingOpponents(@NotNull Player player) {
-        if (!getConfig().isGroupMode()) {
-            return getParticipants().size() - 1;
-        }
+    protected int getRemainingOpponentGroups(@NotNull Player player) {
         int opponents = 0;
         Warrior warrior = plugin.getDatabaseManager().getWarrior(player);
         for (Map.Entry<Group, Integer> entry : getGroupParticipants().entrySet()) {
@@ -500,6 +523,10 @@ public abstract class BaseGame {
             opponents += entry.getValue();
         }
         return opponents;
+    }
+
+    protected int getRemainingOpponents() {
+        return getParticipants().size() - 1;
     }
 
     protected void runCommandsBeforeBattle(@NotNull Collection<Warrior> warriors) {
