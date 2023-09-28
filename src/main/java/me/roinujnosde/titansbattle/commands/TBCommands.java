@@ -2,7 +2,17 @@ package me.roinujnosde.titansbattle.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CatchUnknown;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandCompletion;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Conditions;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Dependency;
+import co.aikar.commands.annotation.Description;
+import co.aikar.commands.annotation.Optional;
+import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Values;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
@@ -290,16 +300,16 @@ public class TBCommands extends BaseCommand {
                     .replaceAll("%name-title", getNameTitle())
                     .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
                     .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                            getGroupsVictoriesTitle().length()))
+                                                             getGroupsVictoriesTitle().length()))
                     .replaceAll("%v-title", getGroupsVictoriesTitle())
                     .replaceAll("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                            getGroupsKillsTitle().length()))
+                                                             getGroupsKillsTitle().length()))
                     .replaceAll("%k-title", getGroupsKillsTitle())
                     .replaceAll("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                            getGroupsDeathsTitle().length()))
+                                                                  getGroupsDeathsTitle().length()))
                     .replaceAll("%deaths-title", getGroupsDeathsTitle())
                     .replaceAll("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
-                            - getDefeatsTitle().length()))
+                                                                   - getDefeatsTitle().length()))
                     .replaceAll("%defeats-title", getDefeatsTitle());
         }
 
@@ -326,16 +336,16 @@ public class TBCommands extends BaseCommand {
                     .replaceAll("%name", name)
                     .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
                     .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                            Helper.getLength(victories)))
+                                                             Helper.getLength(victories)))
                     .replaceAll("%victories", String.valueOf(victories))
                     .replaceAll("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                            Helper.getLength(kills)))
+                                                             Helper.getLength(kills)))
                     .replaceAll("%kills", String.valueOf(kills))
                     .replaceAll("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                            Helper.getLength(deaths)))
+                                                                  Helper.getLength(deaths)))
                     .replaceAll("%deaths", String.valueOf(deaths))
                     .replaceAll("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
-                            Helper.getLength(defeats)))
+                                                                   Helper.getLength(defeats)))
                     .replaceAll("%defeats", String.valueOf(defeats));
         }
 
@@ -364,43 +374,46 @@ public class TBCommands extends BaseCommand {
                                   @Values("@games") String game,
                                   @Values("@order_by:type=group") @Optional @Nullable String order,
                                   @Optional @Default("1") int page) {
-            final List<Group> groups;
-            if (plugin.getGroupManager() != null) {
-                groups = new ArrayList<>(plugin.getGroupManager().getGroups());
-            } else {
-                groups = new ArrayList<>(0);
-            }
-            if (groups.isEmpty()) {
-                sender.sendMessage(plugin.getLang("no-data-found"));
-                return;
-            }
 
-            sortGroups(groups, game, order);
-
-            int first = (page == 1) ? 0 : ((page - 1) * limit);
-            int last = first + (limit - 1);
-
-            if (groups.size() <= first) {
-                sender.sendMessage(plugin.getLang("inexistent-page"));
-                return;
-            }
-
-            sender.sendMessage(makeGroupTitle(groups, game));
-
-            String line = plugin.getLang("groups-ranking.line");
-            for (int i = first; i <= last; i++) {
-                int pos = i + 1;
-                Group g;
-                try {
-                    g = groups.get(i);
-                } catch (IndexOutOfBoundsException ex) {
-                    g = null;
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                final List<Group> groups;
+                if (plugin.getGroupManager() != null) {
+                    groups = new ArrayList<>(plugin.getGroupManager().getGroups());
+                } else {
+                    groups = new ArrayList<>(0);
                 }
-                if (g == null) {
-                    break;
+                if (groups.isEmpty()) {
+                    sender.sendMessage(plugin.getLang("no-data-found"));
+                    return;
                 }
-                sender.sendMessage(makeGroupLine(g, game, line, pos, groups));
-            }
+
+                sortGroups(groups, game, order);
+
+                int first = (page == 1) ? 0 : ((page - 1) * limit);
+                int last = first + (limit - 1);
+
+                if (groups.size() <= first) {
+                    sender.sendMessage(plugin.getLang("inexistent-page"));
+                    return;
+                }
+
+                sender.sendMessage(makeGroupTitle(groups, game));
+
+                String line = plugin.getLang("groups-ranking.line");
+                for (int i = first; i <= last; i++) {
+                    int pos = i + 1;
+                    Group g;
+                    try {
+                        g = groups.get(i);
+                    } catch (IndexOutOfBoundsException ex) {
+                        g = null;
+                    }
+                    if (g == null) {
+                        break;
+                    }
+                    sender.sendMessage(makeGroupLine(g, game, line, pos, groups));
+                }
+            });
         }
 
         @Subcommand("%players|players")
@@ -411,38 +424,40 @@ public class TBCommands extends BaseCommand {
                                    @Values("@games") String game,
                                    @Values("@order_by:type=warrior") @Optional @Nullable String order,
                                    @Optional @Default("1") int page) {
-            final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
-            if (warriors.isEmpty()) {
-                sender.sendMessage(plugin.getLang("no-data-found"));
-                return;
-            }
-
-            sortWarriors(warriors, game, order);
-
-            int first = (page == 1) ? 0 : ((page - 1) * limit);
-            int last = first + (limit - 1);
-
-            if (warriors.size() <= first) {
-                sender.sendMessage(plugin.getLang("inexistent-page"));
-                return;
-            }
-
-            sender.sendMessage(makeWarriorTitle(warriors, game));
-
-            String line = plugin.getLang("players-ranking.line");
-            for (int i = first; i <= last; i++) {
-                int pos = i + 1;
-                Warrior w;
-                try {
-                    w = warriors.get(i);
-                } catch (IndexOutOfBoundsException ex) {
-                    w = null;
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
+                if (warriors.isEmpty()) {
+                    sender.sendMessage(plugin.getLang("no-data-found"));
+                    return;
                 }
-                if (w == null) {
-                    break;
+
+                sortWarriors(warriors, game, order);
+
+                int first = (page == 1) ? 0 : ((page - 1) * limit);
+                int last = first + (limit - 1);
+
+                if (warriors.size() <= first) {
+                    sender.sendMessage(plugin.getLang("inexistent-page"));
+                    return;
                 }
-                sender.sendMessage(makeWarriorLine(line, pos, w, game, warriors));
-            }
+
+                sender.sendMessage(makeWarriorTitle(warriors, game));
+
+                String line = plugin.getLang("players-ranking.line");
+                for (int i = first; i <= last; i++) {
+                    int pos = i + 1;
+                    Warrior w;
+                    try {
+                        w = warriors.get(i);
+                    } catch (IndexOutOfBoundsException ex) {
+                        w = null;
+                    }
+                    if (w == null) {
+                        break;
+                    }
+                    sender.sendMessage(makeWarriorLine(line, pos, w, game, warriors));
+                }
+            });
         }
     }
 
@@ -451,34 +466,42 @@ public class TBCommands extends BaseCommand {
     @CommandCompletion("@games @winners_dates")
     @Description("{@@command.description.winners}")
     public void winners(CommandSender sender, @Values("@games") GameConfiguration game, @Optional @Nullable Date date) {
-        Winners winners = databaseManager.getLatestWinners();
-        if (date != null) {
-            winners = databaseManager.getWinners(date);
-        }
-        date = winners.getDate();
+        final Date finalDate = date;
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Winners winners;
+            if (finalDate != null) {
+                winners = databaseManager.getWinners(finalDate);
+            } else {
+                winners = databaseManager.getLatestWinners();
+            }
 
-        List<UUID> playerWinners = winners.getPlayerWinners(game.getName());
-        String members;
-        if (playerWinners == null) {
-            members = plugin.getLang("winners-no-player-winners", game);
-        } else {
-            members = Helper.buildStringFrom(Helper.uuidListToPlayerNameList(playerWinners));
-        }
-        UUID uuid = winners.getKiller(game.getName());
-        String name;
-        if (uuid == null) {
-            name = plugin.getLang("winners-no-killer", game);
-        } else {
-            name = databaseManager.getWarrior(uuid).getName();
-        }
+            Date updatedDate = winners.getDate();
 
-        String group = winners.getWinnerGroup(game.getName());
-        if (group == null) {
-            group = plugin.getLang("winners-no-winner-group", game);
-        }
-        String dateFormat = plugin.getConfigManager().getDateFormat();
-        sender.sendMessage(MessageFormat.format(plugin.getLang("winners", game),
-                new SimpleDateFormat(dateFormat).format(date), name, group, members));
+            List<UUID> playerWinners = winners.getPlayerWinners(game.getName());
+            String members;
+            if (playerWinners == null) {
+                members = plugin.getLang("winners-no-player-winners", game);
+            } else {
+                members = Helper.buildStringFrom(Helper.uuidListToPlayerNameList(playerWinners));
+            }
+
+            UUID uuid = winners.getKiller(game.getName());
+            String name;
+            if (uuid == null) {
+                name = plugin.getLang("winners-no-killer", game);
+            } else {
+                name = databaseManager.getWarrior(uuid).getName();
+            }
+
+            String group = winners.getWinnerGroup(game.getName());
+            if (group == null) {
+                group = plugin.getLang("winners-no-winner-group", game);
+            }
+
+            String dateFormat = plugin.getConfigManager().getDateFormat();
+            sender.sendMessage(MessageFormat.format(plugin.getLang("winners", game),
+                    new SimpleDateFormat(dateFormat).format(updatedDate), name, group, members));
+        });
     }
 
     @Subcommand("%watch|watch")
