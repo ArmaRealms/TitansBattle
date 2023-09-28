@@ -99,7 +99,7 @@ public final class TitansBattle extends JavaPlugin {
 
         Optional<Game> currentGame = getGameManager().getCurrentGame();
         if (currentGame.isPresent() && (currentGame.get().isParticipant(warrior))) {
-                return currentGame.get();
+            return currentGame.get();
         }
         List<ChallengeRequest<?>> requests = getChallengeManager().getRequests();
         for (ChallengeRequest<?> request : requests) {
