@@ -262,11 +262,13 @@ public class RankingCommand extends BaseCommand {
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             final List<Group> groups;
+
             if (plugin.getGroupManager() != null) {
                 groups = new ArrayList<>(plugin.getGroupManager().getGroups());
             } else {
                 groups = new ArrayList<>(0);
             }
+
             if (groups.isEmpty()) {
                 sender.sendMessage(plugin.getLang("no-data-found"));
                 return;
@@ -287,16 +289,9 @@ public class RankingCommand extends BaseCommand {
 
             for (int i = result.get().first; i <= result.get().last; i++) {
                 int pos = i + 1;
-                Group g;
-                try {
-                    g = groups.get(i);
-                } catch (IndexOutOfBoundsException ex) {
-                    g = null;
-                }
-                if (g == null) {
-                    break;
-                }
-                groupsList.add(makeGroupLine(g, game, line, pos, groups));
+                if (i >= groups.size()) break;
+                Group group = groups.get(i);
+                groupsList.add(makeGroupLine(group, game, line, pos, groups));
             }
 
             sender.sendMessage(makeGroupTitle(groups, game));
@@ -319,6 +314,7 @@ public class RankingCommand extends BaseCommand {
                                @Optional @Default("1") int page) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
+
             if (warriors.isEmpty()) {
                 sender.sendMessage(plugin.getLang("no-data-found"));
                 return;
@@ -333,16 +329,9 @@ public class RankingCommand extends BaseCommand {
             List<String> warriosList = new ArrayList<>();
             for (int i = result.get().first; i <= result.get().last; i++) {
                 int pos = i + 1;
-                Warrior w;
-                try {
-                    w = warriors.get(i);
-                } catch (IndexOutOfBoundsException ex) {
-                    w = null;
-                }
-                if (w == null) {
-                    break;
-                }
-                warriosList.add(makeWarriorLine(line, pos, w, game, warriors));
+                if (i >= warriors.size()) break;
+                Warrior warrior = warriors.get(i);
+                warriosList.add(makeWarriorLine(line, pos, warrior, game, warriors));
             }
 
             sender.sendMessage(makeWarriorTitle(warriors, game));
