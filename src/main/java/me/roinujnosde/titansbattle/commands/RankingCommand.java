@@ -258,12 +258,8 @@ public class RankingCommand extends BaseCommand {
 
     public void sendNavBar(CommandSender sender, String options, int page, int maxPage) {
         // TODO: fetch from language file
-        if (!(sender instanceof Player)) return;
-
-        Player player = (Player) sender;
         TextComponent message = new TextComponent();
-
-        String command = "/tb ranking " + options + " ";
+        String command = String.format("/tb ranking %s ", options);
 
         TextComponent previousPage = new TextComponent("[Página Anterior]");
         int previousPageNumber = page <= 1 ? 1 : page - 1;
@@ -277,7 +273,12 @@ public class RankingCommand extends BaseCommand {
         message.addExtra(" Página " + page + " de " + maxPage + " ");
         message.addExtra(nextPage);
 
-        player.spigot().sendMessage(message);
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            player.spigot().sendMessage(message);
+        } else {
+            sender.sendMessage(message.getText());
+        }
     }
 
     @Subcommand("%groups|groups")
@@ -293,7 +294,8 @@ public class RankingCommand extends BaseCommand {
         final String finalOrder = order == null ? "" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> groupsList;
-            if (rankingCache.get("groups-" + page) == null) {
+            String cacheKey = String.format("%s-%s-%s-%d", "groups", game, finalOrder, page);
+            if (rankingCache.get(cacheKey) == null) {
                 final List<Group> groups;
 
                 if (plugin.getGroupManager() != null) {
@@ -328,7 +330,7 @@ public class RankingCommand extends BaseCommand {
                 }
                 rankingCache.put("groups", groupsList);
             } else {
-                groupsList = rankingCache.get("groups-" + page);
+                groupsList = rankingCache.get(cacheKey);
             }
 
             if (groupsList != null && !groupsList.isEmpty()) {
@@ -336,8 +338,8 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                sendNavBar(sender, "groups " + game + " " + finalOrder, page,
-                        databaseManager.getGroups().size() / configManager.getPageLimitRanking() + 1);
+                String options = String.format("%s %s %s", "groups", game, finalOrder);
+                sendNavBar(sender, options, page, databaseManager.getGroups().size() / configManager.getPageLimitRanking() + 1);
             }
         });
     }
@@ -355,7 +357,8 @@ public class RankingCommand extends BaseCommand {
         final String finalOrder = order == null ? "" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> warriosList;
-            if (rankingCache.get("warriors-" + page) == null) {
+            String cacheKey = String.format("%s-%s-%s-%d", "warriors", game, finalOrder, page);
+            if (rankingCache.get(cacheKey) == null) {
                 final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
 
                 if (warriors.isEmpty()) {
@@ -379,7 +382,7 @@ public class RankingCommand extends BaseCommand {
                 }
                 rankingCache.put("warriors", warriosList);
             } else {
-                warriosList = rankingCache.get("warriors-" + page);
+                warriosList = rankingCache.get(cacheKey);
             }
 
             if (warriosList != null && !warriosList.isEmpty()) {
@@ -387,8 +390,8 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                sendNavBar(sender, game + " " + finalOrder, page,
-                        databaseManager.getWarriors().size() / configManager.getPageLimitRanking() + 1);
+                String options = String.format("%s %s %s", "warriors", game, finalOrder);
+                sendNavBar(sender, options, page, databaseManager.getWarriors().size() / configManager.getPageLimitRanking() + 1);
             }
         });
     }
