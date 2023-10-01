@@ -25,9 +25,9 @@ public class OrderByCompletion extends AbstractAsyncCompletion {
         if (type != null) {
             switch (type) {
                 case "group":
-                    return Arrays.asList("kills", "deaths", "defeats");
+                    return Arrays.asList("wins", "kills", "deaths", "defeats");
                 case "warrior":
-                    return Arrays.asList("kills", "deaths");
+                    return Arrays.asList("wins", "kills", "deaths");
             }
         }
         return Collections.emptySet();

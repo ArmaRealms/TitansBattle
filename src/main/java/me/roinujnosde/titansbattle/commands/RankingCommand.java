@@ -289,14 +289,14 @@ public class RankingCommand extends BaseCommand {
     @Description("{@@command.description.ranking.groups}")
     public void groupsRanking(CommandSender sender,
                               @Values("@games") String game,
-                              @Values("@order_by:type=group") @Optional @Nullable String order,
+                              @Values("@order_by:type=group") @Default("wins") @Optional @Nullable String order,
                               @Optional @Default("1") int page) {
         // TODO: add loading message?
 
-        final String finalOrder = order == null ? "wins" : order;
+        //final String finalOrder = order == null ? "wins" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> groupsList;
-            String cacheKey = String.format("%s-%s-%s-%d", "groups", game, finalOrder, page);
+            String cacheKey = String.format("%s-%s-%s-%d", "groups", game, order, page);
             if (rankingCache.get(cacheKey) == null) {
                 final List<Group> groups;
 
@@ -311,7 +311,7 @@ public class RankingCommand extends BaseCommand {
                     return;
                 }
 
-                sortGroups(groups, game, finalOrder);
+                sortGroups(groups, game, order);
 
                 java.util.Optional<Result> result = getResult(sender, page, groups);
                 if (!result.isPresent()) return;
@@ -340,7 +340,7 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                String options = String.format("%s %s %s", "groups", game, finalOrder);
+                String options = String.format("%s %s %s", "groups", game, order);
                 sendNavBar(sender, options, page, databaseManager.getGroups().size() / configManager.getPageLimitRanking() + 1);
             }
         });
@@ -352,14 +352,14 @@ public class RankingCommand extends BaseCommand {
     @Description("{@@command.description.ranking.player}")
     public void playersRanking(CommandSender sender,
                                @Values("@games") String game,
-                               @Values("@order_by:type=warrior") @Optional @Nullable String order,
+                               @Values("@order_by:type=warrior") @Default("wins") @Optional @Nullable String order,
                                @Optional @Default("1") int page) {
         // TODO: add loading message?
 
-        final String finalOrder = order == null ? "wins" : order;
+        //final String finalOrder = order == null ? "wins" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> warriosList;
-            String cacheKey = String.format("%s-%s-%s-%d", "warriors", game, finalOrder, page);
+            String cacheKey = String.format("%s-%s-%s-%d", "warriors", game, order, page);
             if (rankingCache.get(cacheKey) == null) {
                 final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
 
@@ -368,7 +368,7 @@ public class RankingCommand extends BaseCommand {
                     return;
                 }
 
-                sortWarriors(warriors, game, finalOrder);
+                sortWarriors(warriors, game, order);
 
                 java.util.Optional<Result> result = getResult(sender, page, warriors);
                 if (!result.isPresent()) return;
@@ -392,7 +392,7 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                String options = String.format("%s %s %s", "warriors", game, finalOrder);
+                String options = String.format("%s %s %s", "players", game, order);
                 sendNavBar(sender, options, page, databaseManager.getWarriors().size() / configManager.getPageLimitRanking() + 1);
             }
         });
