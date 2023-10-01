@@ -11,6 +11,7 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Values;
 import me.roinujnosde.titansbattle.TitansBattle;
+import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
@@ -33,9 +34,9 @@ public class RankingCommand extends BaseCommand {
     @Dependency
     private ConfigManager configManager;
     @Dependency
+    private ConfigurationDao configDao;
+    @Dependency
     private DatabaseManager databaseManager;
-
-    private final int limit = configManager.getPageLimitRanking();
 
     private void sortGroups(final @NotNull List<Group> groups, final String game, @Nullable String order) {
         groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
@@ -356,6 +357,7 @@ public class RankingCommand extends BaseCommand {
 
     @NotNull
     private java.util.Optional<Result> getResult(CommandSender sender, int page, @NotNull List<?> list) {
+        int limit = configManager.getPageLimitRanking();
         int first = (page == 1) ? 0 : ((page - 1) * limit);
         int last = first + (limit - 1);
 
