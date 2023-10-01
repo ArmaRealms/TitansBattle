@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @CommandAlias("%titansbattle|tb")
+@Subcommand("%ranking|ranking")
 public class RankingCommand extends BaseCommand {
 
     @Dependency
@@ -250,7 +251,7 @@ public class RankingCommand extends BaseCommand {
                 .replaceAll("%deaths", String.valueOf(deaths));
     }
 
-    @Subcommand("%ranking|ranking %groups|groups")
+    @Subcommand("%groups|groups")
     @CommandPermission("titansbattle.ranking")
     @CommandCompletion("@games @order_by:type=group @pages:type=group")
     @Description("{@@command.description.ranking.groups}")
@@ -308,7 +309,7 @@ public class RankingCommand extends BaseCommand {
         });
     }
 
-    @Subcommand("%ranking|ranking %players|players")
+    @Subcommand("%players|players")
     @CommandPermission("titansbattle.ranking")
     @CommandCompletion("@games @order_by:type=warrior @pages:type=warrior")
     @Description("{@@command.description.ranking.players}")
