@@ -293,11 +293,13 @@ public class RankingCommand extends BaseCommand {
                               @Optional @Default("1") int page) {
         // TODO: add loading message?
 
-        //final String finalOrder = order == null ? "wins" : order;
+        final String finalOrder = order == null ? "wins" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> groupsList;
-            String cacheKey = String.format("%s-%s-%s-%d", "groups", game, order, page);
+            String cacheKey = String.format("%s-%s-%s-%d", "groups", game, finalOrder, page);
+            plugin.getLogger().info("cacheKey: " + cacheKey);
             if (rankingCache.get(cacheKey) == null) {
+                plugin.getLogger().info("cacheKey not found");
                 final List<Group> groups;
 
                 if (plugin.getGroupManager() != null) {
@@ -311,7 +313,7 @@ public class RankingCommand extends BaseCommand {
                     return;
                 }
 
-                sortGroups(groups, game, order);
+                sortGroups(groups, game, finalOrder);
 
                 java.util.Optional<Result> result = getResult(sender, page, groups);
                 if (!result.isPresent()) return;
@@ -332,6 +334,7 @@ public class RankingCommand extends BaseCommand {
                 }
                 rankingCache.put("groups", groupsList);
             } else {
+                plugin.getLogger().info("cacheKey found");
                 groupsList = rankingCache.get(cacheKey);
             }
 
@@ -340,7 +343,7 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                String options = String.format("%s %s %s", "groups", game, order);
+                String options = String.format("%s %s %s", "groups", game, finalOrder);
                 sendNavBar(sender, options, page, databaseManager.getGroups().size() / configManager.getPageLimitRanking() + 1);
             }
         });
@@ -356,11 +359,13 @@ public class RankingCommand extends BaseCommand {
                                @Optional @Default("1") int page) {
         // TODO: add loading message?
 
-        //final String finalOrder = order == null ? "wins" : order;
+        final String finalOrder = order == null ? "wins" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> warriosList;
-            String cacheKey = String.format("%s-%s-%s-%d", "warriors", game, order, page);
+            String cacheKey = String.format("%s-%s-%s-%d", "warriors", game, finalOrder, page);
+            plugin.getLogger().info("cacheKey: " + cacheKey);
             if (rankingCache.get(cacheKey) == null) {
+                plugin.getLogger().info("cacheKey not found");
                 final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
 
                 if (warriors.isEmpty()) {
@@ -368,7 +373,7 @@ public class RankingCommand extends BaseCommand {
                     return;
                 }
 
-                sortWarriors(warriors, game, order);
+                sortWarriors(warriors, game, finalOrder);
 
                 java.util.Optional<Result> result = getResult(sender, page, warriors);
                 if (!result.isPresent()) return;
@@ -384,6 +389,7 @@ public class RankingCommand extends BaseCommand {
                 }
                 rankingCache.put("warriors", warriosList);
             } else {
+                plugin.getLogger().info("cacheKey found");
                 warriosList = rankingCache.get(cacheKey);
             }
 
@@ -392,7 +398,7 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                String options = String.format("%s %s %s", "players", game, order);
+                String options = String.format("%s %s %s", "players", game, finalOrder);
                 sendNavBar(sender, options, page, databaseManager.getWarriors().size() / configManager.getPageLimitRanking() + 1);
             }
         });
@@ -433,7 +439,7 @@ public class RankingCommand extends BaseCommand {
             cache = CacheBuilder.newBuilder()
                     .concurrencyLevel(4)
                     // TODO: fetch from config?
-                    .expireAfterWrite(120, TimeUnit.SECONDS)
+                    .expireAfterWrite(300, TimeUnit.SECONDS)
                     .build();
         }
 
