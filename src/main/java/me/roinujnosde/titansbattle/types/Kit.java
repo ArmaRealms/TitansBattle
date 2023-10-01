@@ -93,11 +93,11 @@ public class Kit implements ConfigurationSerializable {
 
     public void set(@NotNull Player player) {
         PlayerInventory inventory = player.getInventory();
-        inventory.setContents(contents);
         inventory.setHelmet(helmet);
         inventory.setChestplate(chestplate);
         inventory.setLeggings(leggings);
         inventory.setBoots(boots);
+        inventory.setContents(contents);
     }
 
     public static boolean inventoryHasItems(@NotNull Player player) {
@@ -139,8 +139,8 @@ public class Kit implements ConfigurationSerializable {
     }
 
     private ItemStack clone(ItemStack item) {
-        item = item.clone();
         if (item != null && item.getType() != Material.AIR) {
+            item = item.clone();
             new NBTItem(item, true).setBoolean(NBT_TAG, true);
         }
         return item;
