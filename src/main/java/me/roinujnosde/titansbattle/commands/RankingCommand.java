@@ -18,8 +18,11 @@ import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.Helper;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +46,7 @@ public class RankingCommand extends BaseCommand {
 
     private void sortGroups(final @NotNull List<Group> groups, final String game, @Nullable String order) {
         groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
-        if (order != null) {
+        if (order != null && !order.isEmpty()) {
             if (order.equalsIgnoreCase("kills")) {
                 groups.sort((g, g2) -> Integer.compare(g.getData().getKills(game), g2.getData().getKills(game)) * -1);
             }
@@ -58,7 +61,7 @@ public class RankingCommand extends BaseCommand {
 
     private void sortWarriors(final @NotNull List<Warrior> warriors, final String game, final @Nullable String order) {
         warriors.sort((w, w2) -> Integer.compare(w.getVictories(game), w2.getVictories(game)) * -1);
-        if (order != null) {
+        if (order != null && !order.isEmpty()) {
             if (order.equalsIgnoreCase("kills")) {
                 warriors.sort((w, w2) -> Integer.compare(w.getKills(game), w2.getKills(game)) * -1);
             }
@@ -253,6 +256,28 @@ public class RankingCommand extends BaseCommand {
                 .replace("%deaths", String.valueOf(deaths));
     }
 
+    public void sendNavBar(CommandSender sender, String options, int page, int maxPage) {
+        // TODO: fetch from language file
+        if (!(sender instanceof Player)) return;
+
+        Player player = (Player) sender;
+        TextComponent message = new TextComponent();
+
+        String command = "/tb ranking " + options + " ";
+
+        TextComponent previousPage = new TextComponent("[Página Anterior]");
+        previousPage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + (page - 1)));
+
+        TextComponent nextPage = new TextComponent("[Próxima Página]");
+        nextPage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + (page + 1)));
+
+        message.addExtra(previousPage);
+        message.addExtra(" Página " + page + " de " + maxPage + " ");
+        message.addExtra(nextPage);
+
+        player.spigot().sendMessage(message);
+    }
+
     @Subcommand("%groups|groups")
     @CommandPermission("titansbattle.ranking")
     @CommandCompletion("@games @order_by:type=group @pages:type=group")
@@ -261,9 +286,12 @@ public class RankingCommand extends BaseCommand {
                               @Values("@games") String game,
                               @Values("@order_by:type=group") @Optional @Nullable String order,
                               @Optional @Default("1") int page) {
+        // TODO: add loading message?
+
+        final String finalOrder = order == null ? "" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> groupsList;
-            if (rankingCache.get("groups") == null) {
+            if (rankingCache.get("groups-" + page) == null) {
                 final List<Group> groups;
 
                 if (plugin.getGroupManager() != null) {
@@ -298,13 +326,15 @@ public class RankingCommand extends BaseCommand {
                 }
                 rankingCache.put("groups", groupsList);
             } else {
-                groupsList = rankingCache.get("groups");
+                groupsList = rankingCache.get("groups-" + page);
             }
 
-            if (!groupsList.isEmpty()) {
+            if (groupsList != null && !groupsList.isEmpty()) {
                 for (String s : groupsList) {
                     sender.sendMessage(s);
                 }
+
+                sendNavBar(sender, game + " " + finalOrder, page, groupsList.size() / configManager.getPageLimitRanking() + 1);
             }
         });
     }
@@ -317,9 +347,12 @@ public class RankingCommand extends BaseCommand {
                                @Values("@games") String game,
                                @Values("@order_by:type=warrior") @Optional @Nullable String order,
                                @Optional @Default("1") int page) {
+        // TODO: add loading message?
+
+        final String finalOrder = order == null ? "" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> warriosList;
-            if (rankingCache.get("warriors") == null) {
+            if (rankingCache.get("warriors-" + page) == null) {
                 final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
 
                 if (warriors.isEmpty()) {
@@ -343,13 +376,15 @@ public class RankingCommand extends BaseCommand {
                 }
                 rankingCache.put("warriors", warriosList);
             } else {
-                warriosList = rankingCache.get("warriors");
+                warriosList = rankingCache.get("warriors-" + page);
             }
 
-            if (!warriosList.isEmpty()) {
+            if (warriosList != null && !warriosList.isEmpty()) {
                 for (String s : warriosList) {
                     sender.sendMessage(s);
                 }
+
+                sendNavBar(sender, game + " " + finalOrder, page, warriosList.size() / configManager.getPageLimitRanking() + 1);
             }
         });
     }
