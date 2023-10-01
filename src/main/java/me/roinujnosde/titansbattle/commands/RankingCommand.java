@@ -40,7 +40,7 @@ public class RankingCommand extends BaseCommand {
 
     private final int limit = configManager.getPageLimitRanking();
 
-    private void sortGroups(final List<Group> groups, final String game, @Nullable String order) {
+    private void sortGroups(final @NotNull List<Group> groups, final String game, @Nullable String order) {
         groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
         if (order != null) {
             if (order.equalsIgnoreCase("kills")) {
@@ -55,7 +55,7 @@ public class RankingCommand extends BaseCommand {
         }
     }
 
-    private void sortWarriors(final List<Warrior> warriors, final String game, final @Nullable String order) {
+    private void sortWarriors(final @NotNull List<Warrior> warriors, final String game, final @Nullable String order) {
         warriors.sort((w, w2) -> Integer.compare(w.getVictories(game), w2.getVictories(game)) * -1);
         if (order != null) {
             if (order.equalsIgnoreCase("kills")) {
@@ -67,7 +67,7 @@ public class RankingCommand extends BaseCommand {
         }
     }
 
-    private int getDefeatsSize(List<Group> groups, String game) {
+    private int getDefeatsSize(@NotNull List<Group> groups, String game) {
         int defeatsSize = String.valueOf(groups.stream().mapToInt(g -> g.getData().getDefeats(game)).max()
                 .orElse(0)).length();
         if (getDefeatsTitle().length() > defeatsSize) {
@@ -76,7 +76,7 @@ public class RankingCommand extends BaseCommand {
         return defeatsSize;
     }
 
-    private int getGroupsDeathsSize(List<Group> groups, String game) {
+    private int getGroupsDeathsSize(@NotNull List<Group> groups, String game) {
         int deathsSize = String.valueOf(groups.stream().mapToInt(g -> g.getData().getDeaths(game)).max().orElse(0)).length();
         if (getGroupsDeathsTitle().length() > deathsSize) {
             deathsSize = getGroupsDeathsTitle().length();
@@ -84,7 +84,7 @@ public class RankingCommand extends BaseCommand {
         return deathsSize;
     }
 
-    private int getGroupsKillsSize(List<Group> groups, String game) {
+    private int getGroupsKillsSize(@NotNull List<Group> groups, String game) {
         int killsSize = String.valueOf(groups.stream().mapToInt(g -> g.getData().getKills(game)).max()
                 .orElse(0)).length();
         if (getGroupsKillsTitle().length() > killsSize) {
@@ -93,7 +93,7 @@ public class RankingCommand extends BaseCommand {
         return killsSize;
     }
 
-    private int getGroupsVictoriesSize(List<Group> groups, String game) {
+    private int getGroupsVictoriesSize(@NotNull List<Group> groups, String game) {
         int victoriesSize = String.valueOf(groups.stream().mapToInt(g -> g.getData().getVictories(game)).max()
                 .orElse(0)).length();
         if (getGroupsVictoriesTitle().length() > victoriesSize) {
@@ -102,7 +102,7 @@ public class RankingCommand extends BaseCommand {
         return victoriesSize;
     }
 
-    private int getNameSize(List<Group> groups) {
+    private int getNameSize(@NotNull List<Group> groups) {
         int nameSize = groups.stream().mapToInt(g -> g.getId().length()).max().orElse(0);
         if (getNameTitle().length() > nameSize) {
             nameSize = getNameTitle().length();
@@ -110,7 +110,7 @@ public class RankingCommand extends BaseCommand {
         return nameSize;
     }
 
-    private int getNickSize(final List<Warrior> warriors) {
+    private int getNickSize(final @NotNull List<Warrior> warriors) {
         int nickSize = warriors.stream().mapToInt(w -> w.getName().length()).max().orElse(0);
         if (getNicknameTitle().length() > nickSize) {
             nickSize = getNicknameTitle().length();
@@ -118,7 +118,7 @@ public class RankingCommand extends BaseCommand {
         return nickSize;
     }
 
-    private int getVictoriesSize(final List<Warrior> warriors, final String game) {
+    private int getVictoriesSize(final @NotNull List<Warrior> warriors, final String game) {
         int victoriesSize = String.valueOf(warriors.stream().mapToInt(w -> w.getVictories(game)).max()
                 .orElse(0)).length();
         if (getVictoriesTitle().length() > victoriesSize) {
@@ -127,7 +127,7 @@ public class RankingCommand extends BaseCommand {
         return victoriesSize;
     }
 
-    private int getKillsSize(final List<Warrior> warriors, final String game) {
+    private int getKillsSize(final @NotNull List<Warrior> warriors, final String game) {
         int killsSize = String.valueOf(warriors.stream().mapToInt(w -> w.getKills(game)).max().orElse(0))
                 .length();
         if (getKillsTitle().length() > killsSize) {
@@ -136,7 +136,7 @@ public class RankingCommand extends BaseCommand {
         return killsSize;
     }
 
-    private int getDeathsSize(final List<Warrior> warriors, final String game) {
+    private int getDeathsSize(final @NotNull List<Warrior> warriors, final String game) {
         int deathsSize = String.valueOf(warriors.stream().mapToInt(w -> w.getDeaths(game)).max().orElse(0))
                 .length();
         if (getDeathsTitle().length() > deathsSize) {
@@ -145,43 +145,43 @@ public class RankingCommand extends BaseCommand {
         return deathsSize;
     }
 
-    private String getDefeatsTitle() {
+    private @NotNull String getDefeatsTitle() {
         return plugin.getLang("groups-ranking.defeats-title");
     }
 
-    private String getGroupsDeathsTitle() {
+    private @NotNull String getGroupsDeathsTitle() {
         return plugin.getLang("groups-ranking.deaths-title");
     }
 
-    private String getGroupsKillsTitle() {
+    private @NotNull String getGroupsKillsTitle() {
         return plugin.getLang("groups-ranking.kills-title");
     }
 
-    private String getGroupsVictoriesTitle() {
+    private @NotNull String getGroupsVictoriesTitle() {
         return plugin.getLang("groups-ranking.victories-title");
     }
 
-    private String getNameTitle() {
+    private @NotNull String getNameTitle() {
         return plugin.getLang("groups-ranking.name-title");
     }
 
-    private String getNicknameTitle() {
+    private @NotNull String getNicknameTitle() {
         return plugin.getLang("players-ranking.nickname-title");
     }
 
-    private String getVictoriesTitle() {
+    private @NotNull String getVictoriesTitle() {
         return plugin.getLang("players-ranking.victories-title");
     }
 
-    private String getKillsTitle() {
+    private @NotNull String getKillsTitle() {
         return plugin.getLang("players-ranking.kills-title");
     }
 
-    private String getDeathsTitle() {
+    private @NotNull String getDeathsTitle() {
         return plugin.getLang("players-ranking.deaths-title");
     }
 
-    private String makeGroupTitle(List<Group> groups, String game) {
+    private @NotNull String makeGroupTitle(List<Group> groups, String game) {
         return plugin.getLang("groups-ranking.title")
                 .replaceAll("%name-title", getNameTitle())
                 .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
@@ -199,7 +199,7 @@ public class RankingCommand extends BaseCommand {
                 .replaceAll("%defeats-title", getDefeatsTitle());
     }
 
-    private String makeWarriorTitle(final List<Warrior> warriors, final String game) {
+    private @NotNull String makeWarriorTitle(final List<Warrior> warriors, final String game) {
         return plugin.getLang("players-ranking.title")
                 .replaceAll("%nickname-title", getNicknameTitle())
                 .replaceAll("%v-title", getVictoriesTitle())
@@ -211,7 +211,7 @@ public class RankingCommand extends BaseCommand {
                 .replaceAll("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - getDeathsTitle().length()));
     }
 
-    private String makeGroupLine(Group g, final String game, String line, int pos, List<Group> groups) {
+    private @NotNull String makeGroupLine(@NotNull Group g, final String game, @NotNull String line, int pos, List<Group> groups) {
         String name = g.getName();
 
         final int victories = g.getData().getVictories(game);
@@ -235,7 +235,7 @@ public class RankingCommand extends BaseCommand {
                 .replaceAll("%defeats", String.valueOf(defeats));
     }
 
-    private String makeWarriorLine(String line, int pos, Warrior w, String game, List<Warrior> warriors) {
+    private @NotNull String makeWarriorLine(@NotNull String line, int pos, @NotNull Warrior w, String game, List<Warrior> warriors) {
         String name = w.getName();
         int victories = w.getVictories(game);
         int kills = w.getKills(game);
