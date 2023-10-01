@@ -179,32 +179,32 @@ public class RankingCommand extends BaseCommand {
 
     private @NotNull String makeGroupTitle(List<Group> groups, String game) {
         return plugin.getLang("groups-ranking.title")
-                .replaceAll("%name-title", getNameTitle())
-                .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
-                .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
+                .replace("%name-title", getNameTitle())
+                .replace("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
+                .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
                                                          getGroupsVictoriesTitle().length()))
-                .replaceAll("%v-title", getGroupsVictoriesTitle())
-                .replaceAll("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
+                .replace("%v-title", getGroupsVictoriesTitle())
+                .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
                                                          getGroupsKillsTitle().length()))
-                .replaceAll("%k-title", getGroupsKillsTitle())
-                .replaceAll("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
+                .replace("%k-title", getGroupsKillsTitle())
+                .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
                                                               getGroupsDeathsTitle().length()))
-                .replaceAll("%deaths-title", getGroupsDeathsTitle())
-                .replaceAll("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
+                .replace("%deaths-title", getGroupsDeathsTitle())
+                .replace("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
                                                                - getDefeatsTitle().length()))
-                .replaceAll("%defeats-title", getDefeatsTitle());
+                .replace("%defeats-title", getDefeatsTitle());
     }
 
     private @NotNull String makeWarriorTitle(final List<Warrior> warriors, final String game) {
         return plugin.getLang("players-ranking.title")
-                .replaceAll("%nickname-title", getNicknameTitle())
-                .replaceAll("%v-title", getVictoriesTitle())
-                .replaceAll("%k-title", getKillsTitle())
-                .replaceAll("%d-title", getDeathsTitle())
-                .replaceAll("%n-space", Helper.getSpaces(getNickSize(warriors) - getNicknameTitle().length()))
-                .replaceAll("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - getVictoriesTitle().length()))
-                .replaceAll("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - getKillsTitle().length()))
-                .replaceAll("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - getDeathsTitle().length()));
+                .replace("%nickname-title", getNicknameTitle())
+                .replace("%v-title", getVictoriesTitle())
+                .replace("%k-title", getKillsTitle())
+                .replace("%d-title", getDeathsTitle())
+                .replace("%n-space", Helper.getSpaces(getNickSize(warriors) - getNicknameTitle().length()))
+                .replace("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - getVictoriesTitle().length()))
+                .replace("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - getKillsTitle().length()))
+                .replace("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - getDeathsTitle().length()));
     }
 
     private @NotNull String makeGroupLine(@NotNull Group g, final String game, @NotNull String line, int pos, List<Group> groups) {
@@ -214,21 +214,21 @@ public class RankingCommand extends BaseCommand {
         final int kills = g.getData().getKills(game);
         final int deaths = g.getData().getDeaths(game);
         final int defeats = g.getData().getDefeats(game);
-        return line.replaceAll("%position", String.format("%02d", pos))
-                .replaceAll("%name", name)
-                .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
-                .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
+        return line.replace("%position", String.format("%02d", pos))
+                .replace("%name", name)
+                .replace("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
+                .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
                                                          Helper.getLength(victories)))
-                .replaceAll("%victories", String.valueOf(victories))
-                .replaceAll("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
+                .replace("%victories", String.valueOf(victories))
+                .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
                                                          Helper.getLength(kills)))
-                .replaceAll("%kills", String.valueOf(kills))
-                .replaceAll("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
+                .replace("%kills", String.valueOf(kills))
+                .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
                                                               Helper.getLength(deaths)))
-                .replaceAll("%deaths", String.valueOf(deaths))
-                .replaceAll("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
+                .replace("%deaths", String.valueOf(deaths))
+                .replace("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
                                                                Helper.getLength(defeats)))
-                .replaceAll("%defeats", String.valueOf(defeats));
+                .replace("%defeats", String.valueOf(defeats));
     }
 
     private @NotNull String makeWarriorLine(@NotNull String line, int pos, @NotNull Warrior w, String game, List<Warrior> warriors) {
@@ -237,15 +237,15 @@ public class RankingCommand extends BaseCommand {
         int kills = w.getKills(game);
         int deaths = w.getDeaths(game);
 
-        return line.replaceAll("%position", String.format("%02d", pos))
-                .replaceAll("%nick", name)
-                .replaceAll("%n-space", Helper.getSpaces(getNickSize(warriors) - name.length()))
-                .replaceAll("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - Helper.getLength(victories)))
-                .replaceAll("%victories", String.valueOf(victories))
-                .replaceAll("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - Helper.getLength(kills)))
-                .replaceAll("%kills", String.valueOf(kills))
-                .replaceAll("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - Helper.getLength(deaths)))
-                .replaceAll("%deaths", String.valueOf(deaths));
+        return line.replace("%position", String.format("%02d", pos))
+                .replace("%nick", name)
+                .replace("%n-space", Helper.getSpaces(getNickSize(warriors) - name.length()))
+                .replace("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - Helper.getLength(victories)))
+                .replace("%victories", String.valueOf(victories))
+                .replace("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - Helper.getLength(kills)))
+                .replace("%kills", String.valueOf(kills))
+                .replace("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - Helper.getLength(deaths)))
+                .replace("%deaths", String.valueOf(deaths));
     }
 
     @Subcommand("%groups|groups")
