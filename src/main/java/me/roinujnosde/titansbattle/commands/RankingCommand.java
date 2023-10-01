@@ -266,10 +266,12 @@ public class RankingCommand extends BaseCommand {
         String command = "/tb ranking " + options + " ";
 
         TextComponent previousPage = new TextComponent("[Página Anterior]");
-        previousPage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + (page - 1)));
+        int previousPageNumber = page <= 1 ? 1 : page - 1;
+        previousPage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + previousPageNumber));
 
         TextComponent nextPage = new TextComponent("[Próxima Página]");
-        nextPage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + (page + 1)));
+        int nextPageNumber = page >= maxPage ? maxPage : page + 1;
+        nextPage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command + nextPageNumber));
 
         message.addExtra(previousPage);
         message.addExtra(" Página " + page + " de " + maxPage + " ");
@@ -334,7 +336,8 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                sendNavBar(sender, game + " " + finalOrder, page, groupsList.size() / configManager.getPageLimitRanking() + 1);
+                sendNavBar(sender, "groups " + game + " " + finalOrder, page,
+                        databaseManager.getGroups().size() / configManager.getPageLimitRanking() + 1);
             }
         });
     }
@@ -384,7 +387,8 @@ public class RankingCommand extends BaseCommand {
                     sender.sendMessage(s);
                 }
 
-                sendNavBar(sender, game + " " + finalOrder, page, warriosList.size() / configManager.getPageLimitRanking() + 1);
+                sendNavBar(sender, game + " " + finalOrder, page,
+                        databaseManager.getWarriors().size() / configManager.getPageLimitRanking() + 1);
             }
         });
     }
@@ -424,7 +428,7 @@ public class RankingCommand extends BaseCommand {
             cache = CacheBuilder.newBuilder()
                     .concurrencyLevel(4)
                     // TODO: fetch from config?
-                    .expireAfterWrite(2, TimeUnit.MINUTES)
+                    .expireAfterWrite(120, TimeUnit.SECONDS)
                     .build();
         }
 
