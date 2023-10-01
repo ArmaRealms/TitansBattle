@@ -332,7 +332,7 @@ public class RankingCommand extends BaseCommand {
                     Group group = groups.get(i);
                     groupsList.add(makeGroupLine(group, game, line, pos, groups));
                 }
-                rankingCache.put("groups", groupsList);
+                rankingCache.put(cacheKey, groupsList);
             } else {
                 plugin.getLogger().info("cacheKey found");
                 groupsList = rankingCache.get(cacheKey);
@@ -387,7 +387,7 @@ public class RankingCommand extends BaseCommand {
                     Warrior warrior = warriors.get(i);
                     warriosList.add(makeWarriorLine(line, pos, warrior, game, warriors));
                 }
-                rankingCache.put("warriors", warriosList);
+                rankingCache.put(cacheKey, warriosList);
             } else {
                 plugin.getLogger().info("cacheKey found");
                 warriosList = rankingCache.get(cacheKey);
