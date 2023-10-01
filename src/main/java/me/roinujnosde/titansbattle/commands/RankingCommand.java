@@ -11,7 +11,6 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Values;
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
@@ -31,8 +30,6 @@ public class RankingCommand extends BaseCommand {
 
     @Dependency
     private TitansBattle plugin;
-    @Dependency
-    private ConfigurationDao configDao;
     @Dependency
     private ConfigManager configManager;
     @Dependency
