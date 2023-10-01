@@ -6,6 +6,7 @@ import co.aikar.commands.PaperCommandManager;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.commands.ChallengeCommand;
 import me.roinujnosde.titansbattle.commands.ConfigCommands;
+import me.roinujnosde.titansbattle.commands.RankingCommand;
 import me.roinujnosde.titansbattle.commands.TBCommands;
 import me.roinujnosde.titansbattle.commands.completions.*;
 import me.roinujnosde.titansbattle.commands.conditions.*;
@@ -103,6 +104,7 @@ public class CommandManager extends PaperCommandManager {
 
     private void registerCommands() {
         registerCommand(new TBCommands());
+        registerCommand(new RankingCommand());
         registerCommand(new ChallengeCommand());
         registerCommand(new ConfigCommands());
     }
