@@ -19,6 +19,8 @@ import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.Helper;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -273,18 +275,18 @@ public class RankingCommand extends BaseCommand {
 
             sortGroups(groups, game, order);
 
-            int first = (page == 1) ? 0 : ((page - 1) * limit);
-            int last = first + (limit - 1);
+            java.util.Optional<Result> result = getResult(sender, page, groups);
+            if (!result.isPresent()) return;
 
-            if (groups.size() <= first) {
+            if (groups.size() <= result.get().first) {
                 sender.sendMessage(plugin.getLang("inexistent-page"));
                 return;
             }
 
-            sender.sendMessage(makeGroupTitle(groups, game));
-
             String line = plugin.getLang("groups-ranking.line");
-            for (int i = first; i <= last; i++) {
+            List<String> groupsList = new ArrayList<>();
+
+            for (int i = result.get().first; i <= result.get().last; i++) {
                 int pos = i + 1;
                 Group g;
                 try {
@@ -295,7 +297,15 @@ public class RankingCommand extends BaseCommand {
                 if (g == null) {
                     break;
                 }
+                groupsList.add(makeGroupLine(g, game, line, pos, groups));
                 sender.sendMessage(makeGroupLine(g, game, line, pos, groups));
+            }
+
+            sender.sendMessage(makeGroupTitle(groups, game));
+            if (!groupsList.isEmpty()) {
+                for (String s : groupsList) {
+                    sender.sendMessage(s);
+                }
             }
         });
     }
@@ -317,18 +327,12 @@ public class RankingCommand extends BaseCommand {
 
             sortWarriors(warriors, game, order);
 
-            int first = (page == 1) ? 0 : ((page - 1) * limit);
-            int last = first + (limit - 1);
-
-            if (warriors.size() <= first) {
-                sender.sendMessage(plugin.getLang("inexistent-page"));
-                return;
-            }
-
-            sender.sendMessage(makeWarriorTitle(warriors, game));
+            java.util.Optional<Result> result = getResult(sender, page, warriors);
+            if (!result.isPresent()) return;
 
             String line = plugin.getLang("players-ranking.line");
-            for (int i = first; i <= last; i++) {
+            List<String> warriosList = new ArrayList<>();
+            for (int i = result.get().first; i <= result.get().last; i++) {
                 int pos = i + 1;
                 Warrior w;
                 try {
@@ -339,8 +343,41 @@ public class RankingCommand extends BaseCommand {
                 if (w == null) {
                     break;
                 }
+                warriosList.add(makeWarriorLine(line, pos, w, game, warriors));
                 sender.sendMessage(makeWarriorLine(line, pos, w, game, warriors));
             }
+
+            sender.sendMessage(makeWarriorTitle(warriors, game));
+
+            if (!warriosList.isEmpty()) {
+                for (String s : warriosList) {
+                    sender.sendMessage(s);
+                }
+            }
         });
+    }
+
+    @NotNull
+    private java.util.Optional<Result> getResult(CommandSender sender, int page, @NotNull List<?> list) {
+        int first = (page == 1) ? 0 : ((page - 1) * limit);
+        int last = first + (limit - 1);
+
+        if (list.size() <= first) {
+            sender.sendMessage(plugin.getLang("inexistent-page"));
+            return java.util.Optional.empty();
+        }
+
+        return java.util.Optional.of(new Result(first, last));
+    }
+
+    private static class Result {
+        public final int first;
+        public final int last;
+
+        @Contract(pure = true)
+        public Result(int first, int last) {
+            this.first = first;
+            this.last = last;
+        }
     }
 }
