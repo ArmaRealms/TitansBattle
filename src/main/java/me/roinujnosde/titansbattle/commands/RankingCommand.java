@@ -217,7 +217,7 @@ public class RankingCommand extends BaseCommand {
         final int kills = g.getData().getKills(game);
         final int deaths = g.getData().getDeaths(game);
         final int defeats = g.getData().getDefeats(game);
-        return line.replaceAll("%position", String.valueOf(pos))
+        return line.replaceAll("%position", String.format("%02d", pos))
                 .replaceAll("%name", name)
                 .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
                 .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
@@ -240,7 +240,7 @@ public class RankingCommand extends BaseCommand {
         int kills = w.getKills(game);
         int deaths = w.getDeaths(game);
 
-        return line.replaceAll("%position", String.valueOf(pos))
+        return line.replaceAll("%position", String.format("%02d", pos))
                 .replaceAll("%nick", name)
                 .replaceAll("%n-space", Helper.getSpaces(getNickSize(warriors) - name.length()))
                 .replaceAll("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - Helper.getLength(victories)))
