@@ -343,7 +343,6 @@ public class RankingCommand extends BaseCommand {
                     break;
                 }
                 warriosList.add(makeWarriorLine(line, pos, w, game, warriors));
-                sender.sendMessage(makeWarriorLine(line, pos, w, game, warriors));
             }
 
             sender.sendMessage(makeWarriorTitle(warriors, game));
