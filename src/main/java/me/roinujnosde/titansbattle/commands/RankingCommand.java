@@ -283,15 +283,13 @@ public class RankingCommand extends BaseCommand {
 
             String line = plugin.getLang("groups-ranking.line");
             List<String> groupsList = new ArrayList<>();
-
+            groupsList.add(makeGroupTitle(groups, game));
             for (int i = result.get().first; i <= result.get().last; i++) {
                 int pos = i + 1;
                 if (i >= groups.size()) break;
                 Group group = groups.get(i);
                 groupsList.add(makeGroupLine(group, game, line, pos, groups));
             }
-
-            sender.sendMessage(makeGroupTitle(groups, game));
 
             if (!groupsList.isEmpty()) {
                 for (String s : groupsList) {
@@ -324,14 +322,13 @@ public class RankingCommand extends BaseCommand {
 
             String line = plugin.getLang("players-ranking.line");
             List<String> warriosList = new ArrayList<>();
+            warriosList.add(makeWarriorTitle(warriors, game));
             for (int i = result.get().first; i <= result.get().last; i++) {
                 int pos = i + 1;
                 if (i >= warriors.size()) break;
                 Warrior warrior = warriors.get(i);
                 warriosList.add(makeWarriorLine(line, pos, warrior, game, warriors));
             }
-
-            sender.sendMessage(makeWarriorTitle(warriors, game));
 
             if (!warriosList.isEmpty()) {
                 for (String s : warriosList) {
