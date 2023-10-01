@@ -10,6 +10,8 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Values;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @CommandAlias("%titansbattle|tb")
 @Subcommand("%ranking|ranking")
@@ -35,6 +38,8 @@ public class RankingCommand extends BaseCommand {
     private ConfigManager configManager;
     @Dependency
     private DatabaseManager databaseManager;
+
+    private final RankingCache rankingCache = new RankingCache();
 
     private void sortGroups(final @NotNull List<Group> groups, final String game, @Nullable String order) {
         groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
@@ -182,16 +187,16 @@ public class RankingCommand extends BaseCommand {
                 .replace("%name-title", getNameTitle())
                 .replace("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
                 .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                                                         getGroupsVictoriesTitle().length()))
+                                                      getGroupsVictoriesTitle().length()))
                 .replace("%v-title", getGroupsVictoriesTitle())
                 .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                                                         getGroupsKillsTitle().length()))
+                                                      getGroupsKillsTitle().length()))
                 .replace("%k-title", getGroupsKillsTitle())
                 .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                                                              getGroupsDeathsTitle().length()))
+                                                           getGroupsDeathsTitle().length()))
                 .replace("%deaths-title", getGroupsDeathsTitle())
                 .replace("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
-                                                               - getDefeatsTitle().length()))
+                                                            - getDefeatsTitle().length()))
                 .replace("%defeats-title", getDefeatsTitle());
     }
 
@@ -218,16 +223,16 @@ public class RankingCommand extends BaseCommand {
                 .replace("%name", name)
                 .replace("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
                 .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                                                         Helper.getLength(victories)))
+                                                      Helper.getLength(victories)))
                 .replace("%victories", String.valueOf(victories))
                 .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                                                         Helper.getLength(kills)))
+                                                      Helper.getLength(kills)))
                 .replace("%kills", String.valueOf(kills))
                 .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                                                              Helper.getLength(deaths)))
+                                                           Helper.getLength(deaths)))
                 .replace("%deaths", String.valueOf(deaths))
                 .replace("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
-                                                               Helper.getLength(defeats)))
+                                                            Helper.getLength(defeats)))
                 .replace("%defeats", String.valueOf(defeats));
     }
 
@@ -256,39 +261,44 @@ public class RankingCommand extends BaseCommand {
                               @Values("@games") String game,
                               @Values("@order_by:type=group") @Optional @Nullable String order,
                               @Optional @Default("1") int page) {
-
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            final List<Group> groups;
+            List<String> groupsList;
+            if (rankingCache.get("groups") == null) {
+                final List<Group> groups;
 
-            if (plugin.getGroupManager() != null) {
-                groups = new ArrayList<>(plugin.getGroupManager().getGroups());
+                if (plugin.getGroupManager() != null) {
+                    groups = new ArrayList<>(plugin.getGroupManager().getGroups());
+                } else {
+                    groups = new ArrayList<>(0);
+                }
+
+                if (groups.isEmpty()) {
+                    sender.sendMessage(plugin.getLang("no-data-found"));
+                    return;
+                }
+
+                sortGroups(groups, game, order);
+
+                java.util.Optional<Result> result = getResult(sender, page, groups);
+                if (!result.isPresent()) return;
+
+                if (groups.size() <= result.get().first) {
+                    sender.sendMessage(plugin.getLang("inexistent-page"));
+                    return;
+                }
+
+                String line = plugin.getLang("groups-ranking.line");
+                groupsList = new ArrayList<>();
+                groupsList.add(makeGroupTitle(groups, game));
+                for (int i = result.get().first; i <= result.get().last; i++) {
+                    int pos = i + 1;
+                    if (i >= groups.size()) break;
+                    Group group = groups.get(i);
+                    groupsList.add(makeGroupLine(group, game, line, pos, groups));
+                }
+                rankingCache.put("groups", groupsList);
             } else {
-                groups = new ArrayList<>(0);
-            }
-
-            if (groups.isEmpty()) {
-                sender.sendMessage(plugin.getLang("no-data-found"));
-                return;
-            }
-
-            sortGroups(groups, game, order);
-
-            java.util.Optional<Result> result = getResult(sender, page, groups);
-            if (!result.isPresent()) return;
-
-            if (groups.size() <= result.get().first) {
-                sender.sendMessage(plugin.getLang("inexistent-page"));
-                return;
-            }
-
-            String line = plugin.getLang("groups-ranking.line");
-            List<String> groupsList = new ArrayList<>();
-            groupsList.add(makeGroupTitle(groups, game));
-            for (int i = result.get().first; i <= result.get().last; i++) {
-                int pos = i + 1;
-                if (i >= groups.size()) break;
-                Group group = groups.get(i);
-                groupsList.add(makeGroupLine(group, game, line, pos, groups));
+                groupsList = rankingCache.get("groups");
             }
 
             if (!groupsList.isEmpty()) {
@@ -308,26 +318,32 @@ public class RankingCommand extends BaseCommand {
                                @Values("@order_by:type=warrior") @Optional @Nullable String order,
                                @Optional @Default("1") int page) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
+            List<String> warriosList;
+            if (rankingCache.get("warriors") == null) {
+                final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
 
-            if (warriors.isEmpty()) {
-                sender.sendMessage(plugin.getLang("no-data-found"));
-                return;
-            }
+                if (warriors.isEmpty()) {
+                    sender.sendMessage(plugin.getLang("no-data-found"));
+                    return;
+                }
 
-            sortWarriors(warriors, game, order);
+                sortWarriors(warriors, game, order);
 
-            java.util.Optional<Result> result = getResult(sender, page, warriors);
-            if (!result.isPresent()) return;
+                java.util.Optional<Result> result = getResult(sender, page, warriors);
+                if (!result.isPresent()) return;
 
-            String line = plugin.getLang("players-ranking.line");
-            List<String> warriosList = new ArrayList<>();
-            warriosList.add(makeWarriorTitle(warriors, game));
-            for (int i = result.get().first; i <= result.get().last; i++) {
-                int pos = i + 1;
-                if (i >= warriors.size()) break;
-                Warrior warrior = warriors.get(i);
-                warriosList.add(makeWarriorLine(line, pos, warrior, game, warriors));
+                String line = plugin.getLang("players-ranking.line");
+                warriosList = new ArrayList<>();
+                warriosList.add(makeWarriorTitle(warriors, game));
+                for (int i = result.get().first; i <= result.get().last; i++) {
+                    int pos = i + 1;
+                    if (i >= warriors.size()) break;
+                    Warrior warrior = warriors.get(i);
+                    warriosList.add(makeWarriorLine(line, pos, warrior, game, warriors));
+                }
+                rankingCache.put("warriors", warriosList);
+            } else {
+                warriosList = rankingCache.get("warriors");
             }
 
             if (!warriosList.isEmpty()) {
@@ -353,6 +369,7 @@ public class RankingCommand extends BaseCommand {
     }
 
     private static class Result {
+
         public final int first;
         public final int last;
 
@@ -360,6 +377,29 @@ public class RankingCommand extends BaseCommand {
         public Result(int first, int last) {
             this.first = first;
             this.last = last;
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    static class RankingCache {
+
+        private final Cache<String, List<String>> cache;
+
+        public RankingCache() {
+            cache = CacheBuilder.newBuilder()
+                    .concurrencyLevel(4)
+                    // TODO: fetch from config?
+                    .expireAfterWrite(2, TimeUnit.MINUTES)
+                    .build();
+        }
+
+        public void put(String key, List<String> value) {
+            cache.put(key, value);
+        }
+
+        @Nullable
+        public List<String> get(String key) {
+            return cache.getIfPresent(key);
         }
     }
 }
