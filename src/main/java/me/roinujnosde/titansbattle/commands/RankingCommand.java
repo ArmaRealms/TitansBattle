@@ -44,30 +44,32 @@ public class RankingCommand extends BaseCommand {
 
     private final RankingCache rankingCache = new RankingCache();
 
-    private void sortGroups(final @NotNull List<Group> groups, final String game, @Nullable String order) {
-        groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
-        if (order != null && !order.isEmpty()) {
-            if (order.equalsIgnoreCase("kills")) {
+    private void sortGroups(final @NotNull List<Group> groups, final String game, @NotNull String order) {
+        switch (order) {
+            case "kills":
                 groups.sort((g, g2) -> Integer.compare(g.getData().getKills(game), g2.getData().getKills(game)) * -1);
-            }
-            if (order.equalsIgnoreCase("deaths")) {
+                break;
+            case "deaths":
                 groups.sort((g, g2) -> Integer.compare(g.getData().getDeaths(game), g2.getData().getDeaths(game)) * -1);
-            }
-            if (order.equalsIgnoreCase("defeats")) {
+                break;
+            case "defeats":
                 groups.sort((g, g2) -> Integer.compare(g.getData().getDefeats(game), g2.getData().getDefeats(game)) * -1);
-            }
+                break;
+            default:
+                groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
         }
     }
 
-    private void sortWarriors(final @NotNull List<Warrior> warriors, final String game, final @Nullable String order) {
-        warriors.sort((w, w2) -> Integer.compare(w.getVictories(game), w2.getVictories(game)) * -1);
-        if (order != null && !order.isEmpty()) {
-            if (order.equalsIgnoreCase("kills")) {
+    private void sortWarriors(final @NotNull List<Warrior> warriors, final String game, final @NotNull String order) {
+        switch (order) {
+            case "kills":
                 warriors.sort((w, w2) -> Integer.compare(w.getKills(game), w2.getKills(game)) * -1);
-            }
-            if (order.equalsIgnoreCase("deaths")) {
+                break;
+            case "deaths":
                 warriors.sort((w, w2) -> Integer.compare(w.getDeaths(game), w2.getDeaths(game)) * -1);
-            }
+                break;
+            default:
+                warriors.sort((w, w2) -> Integer.compare(w.getVictories(game), w2.getVictories(game)) * -1);
         }
     }
 
@@ -291,7 +293,7 @@ public class RankingCommand extends BaseCommand {
                               @Optional @Default("1") int page) {
         // TODO: add loading message?
 
-        final String finalOrder = order == null ? "" : order;
+        final String finalOrder = order == null ? "wins" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> groupsList;
             String cacheKey = String.format("%s-%s-%s-%d", "groups", game, finalOrder, page);
@@ -309,7 +311,7 @@ public class RankingCommand extends BaseCommand {
                     return;
                 }
 
-                sortGroups(groups, game, order);
+                sortGroups(groups, game, finalOrder);
 
                 java.util.Optional<Result> result = getResult(sender, page, groups);
                 if (!result.isPresent()) return;
@@ -347,14 +349,14 @@ public class RankingCommand extends BaseCommand {
     @Subcommand("%players|players")
     @CommandPermission("titansbattle.ranking")
     @CommandCompletion("@games @order_by:type=warrior @pages:type=warrior")
-    @Description("{@@command.description.ranking.players}")
+    @Description("{@@command.description.ranking.player}")
     public void playersRanking(CommandSender sender,
                                @Values("@games") String game,
                                @Values("@order_by:type=warrior") @Optional @Nullable String order,
                                @Optional @Default("1") int page) {
         // TODO: add loading message?
 
-        final String finalOrder = order == null ? "" : order;
+        final String finalOrder = order == null ? "wins" : order;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> warriosList;
             String cacheKey = String.format("%s-%s-%s-%d", "warriors", game, finalOrder, page);
@@ -366,7 +368,7 @@ public class RankingCommand extends BaseCommand {
                     return;
                 }
 
-                sortWarriors(warriors, game, order);
+                sortWarriors(warriors, game, finalOrder);
 
                 java.util.Optional<Result> result = getResult(sender, page, warriors);
                 if (!result.isPresent()) return;
