@@ -12,6 +12,7 @@ import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.Syntax;
 import co.aikar.commands.annotation.Values;
 import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.BaseGameConfiguration;
@@ -121,6 +122,7 @@ public class TBCommands extends BaseCommand {
         sender.sendMessage(plugin.getLang("configuration-reloaded"));
     }
 
+    @Default
     @Subcommand("%join|join")
     @CommandPermission("titansbattle.join")
     @Conditions("happening")
@@ -141,8 +143,8 @@ public class TBCommands extends BaseCommand {
     }
 
     @Subcommand("%help|help")
+    @Syntax("[filtro]")
     @CatchUnknown
-    @Default
     @Description("{@@command.description.help}")
     public void doHelp(@NotNull CommandHelp help) {
         help.showHelp();
@@ -191,6 +193,7 @@ public class TBCommands extends BaseCommand {
         });
     }
 
+    @CommandAlias("%watch")
     @Subcommand("%watch|watch")
     @CommandPermission("titansbattle.watch")
     @CommandCompletion("@arenas:in_use")
