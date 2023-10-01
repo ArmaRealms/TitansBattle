@@ -298,10 +298,10 @@ public class RankingCommand extends BaseCommand {
                     break;
                 }
                 groupsList.add(makeGroupLine(g, game, line, pos, groups));
-                sender.sendMessage(makeGroupLine(g, game, line, pos, groups));
             }
 
             sender.sendMessage(makeGroupTitle(groups, game));
+
             if (!groupsList.isEmpty()) {
                 for (String s : groupsList) {
                     sender.sendMessage(s);
