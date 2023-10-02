@@ -108,6 +108,7 @@ public class CommandManager extends PaperCommandManager {
         registerCommand(new RankingCommand());
         registerCommand(new ChallengeCommand());
         registerCommand(new ConfigCommands());
+        registerCommand(new RankingCommand());
     }
 
     private <T> void registerContext(AbstractIssuerOnlyContextResolver<T> resolver) {

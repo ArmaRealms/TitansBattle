@@ -30,7 +30,6 @@ import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.types.Winners;
 import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -155,42 +154,39 @@ public class TBCommands extends BaseCommand {
     @CommandCompletion("@games @winners_dates")
     @Description("{@@command.description.winners}")
     public void winners(CommandSender sender, @Values("@games") GameConfiguration game, @Optional @Nullable Date date) {
-        final Date finalDate = date;
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            Winners winners;
-            if (finalDate != null) {
-                winners = databaseManager.getWinners(finalDate);
-            } else {
-                winners = databaseManager.getLatestWinners();
-            }
+        Winners winners;
+        if (date != null) {
+            winners = databaseManager.getWinners(date);
+        } else {
+            winners = databaseManager.getLatestWinners();
+        }
 
-            Date updatedDate = winners.getDate();
+        Date updatedDate = winners.getDate();
 
-            List<UUID> playerWinners = winners.getPlayerWinners(game.getName());
-            String members;
-            if (playerWinners == null) {
-                members = plugin.getLang("winners-no-player-winners", game);
-            } else {
-                members = Helper.buildStringFrom(Helper.uuidListToPlayerNameList(playerWinners));
-            }
+        List<UUID> playerWinners = winners.getPlayerWinners(game.getName());
+        String members;
+        if (playerWinners == null) {
+            members = plugin.getLang("winners-no-player-winners", game);
+        } else {
+            members = Helper.buildStringFrom(Helper.uuidListToPlayerNameList(playerWinners));
+        }
 
-            UUID uuid = winners.getKiller(game.getName());
-            String name;
-            if (uuid == null) {
-                name = plugin.getLang("winners-no-killer", game);
-            } else {
-                name = databaseManager.getWarrior(uuid).getName();
-            }
+        UUID uuid = winners.getKiller(game.getName());
+        String name;
+        if (uuid == null) {
+            name = plugin.getLang("winners-no-killer", game);
+        } else {
+            name = databaseManager.getWarrior(uuid).getName();
+        }
 
-            String group = winners.getWinnerGroup(game.getName());
-            if (group == null) {
-                group = plugin.getLang("winners-no-winner-group", game);
-            }
+        String group = winners.getWinnerGroup(game.getName());
+        if (group == null) {
+            group = plugin.getLang("winners-no-winner-group", game);
+        }
 
-            String dateFormat = plugin.getConfigManager().getDateFormat();
-            sender.sendMessage(MessageFormat.format(plugin.getLang("winners", game),
-                    new SimpleDateFormat(dateFormat).format(updatedDate), name, group, members));
-        });
+        String dateFormat = plugin.getConfigManager().getDateFormat();
+        sender.sendMessage(MessageFormat.format(plugin.getLang("winners", game),
+                new SimpleDateFormat(dateFormat).format(updatedDate), name, group, members));
     }
 
     @CommandAlias("%watch")

@@ -11,34 +11,96 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Values;
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.Helper;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @CommandAlias("%titansbattle|tb")
+@Subcommand("%ranking|ranking")
 public class RankingCommand extends BaseCommand {
 
     @Dependency
     private TitansBattle plugin;
     @Dependency
-    private ConfigurationDao configDao;
-    @Dependency
     private ConfigManager configManager;
     @Dependency
     private DatabaseManager databaseManager;
 
-    private final int limit = configManager.getPageLimitRanking();
+    @Subcommand("%groups|groups")
+    @CommandPermission("titansbattle.ranking")
+    @CommandCompletion("@games @order_by:type=group @pages:type=group")
+    @Description("{@@command.description.ranking.groups}")
+    public void groupsRanking(CommandSender sender,
+                              @Values("@games") String game,
+                              @Values("@order_by:type=group") @Optional @Nullable String order,
+                              @Optional @Default("1") int page) {
+        final List<Group> groups;
+        if (plugin.getGroupManager() != null) {
+            groups = new ArrayList<>(plugin.getGroupManager().getGroups());
+        } else {
+            groups = new ArrayList<>(0);
+        }
+
+        sortGroups(groups, game, order);
+
+        showRanking(sender, game, groups, this::makeGroupTitle, this::makeGroupLine, page);
+    }
+
+    @Subcommand("%players|players")
+    @CommandPermission("titansbattle.ranking")
+    @CommandCompletion("@games @order_by:type=warrior @pages:type=warrior")
+    @Description("{@@command.description.ranking.players}")
+    public void playersRanking(CommandSender sender,
+                               @Values("@games") String game,
+                               @Values("@order_by:type=warrior") @Optional @Nullable String order,
+                               @Optional @Default("1") int page) {
+        final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
+        sortWarriors(warriors, game, order);
+
+        showRanking(sender, game, warriors, this::makeWarriorTitle, this::makeWarriorLine, page);
+    }
+
+    private <T> void showRanking(CommandSender sender,
+                                 String gameName,
+                                 List<T> list,
+                                 BiFunction<List<T>, String, String> titleFunction,
+                                 Function<LineElement<T>, String> lineFunction,
+                                 int page) {
+        if (list.isEmpty()) {
+            sender.sendMessage(plugin.getLang("no-data-found"));
+            return;
+        }
+
+        int pageLimit = configManager.getPageLimitRanking();
+        int first = (page - 1) * pageLimit;
+        int last = first + pageLimit;
+
+        if (list.size() <= first) {
+            sender.sendMessage(plugin.getLang("inexistent-page"));
+            return;
+        }
+        list = list.subList(first, Math.min(last, list.size()));
+
+        sender.sendMessage(titleFunction.apply(list, gameName));
+
+        for (int i = 0; i < list.size(); i++) {
+            LineElement<T> element = new LineElement<>();
+            element.gameName = gameName;
+            element.list = list;
+            element.data = list.get(i);
+            element.pos = String.format("% 2d", (page - 1) * configManager.getPageLimitRanking() + i + 1);
+            sender.sendMessage(lineFunction.apply(element));
+        }
+    }
 
     private void sortGroups(final List<Group> groups, final String game, @Nullable String order) {
         groups.sort((g, g2) -> Integer.compare(g.getData().getVictories(game), g2.getData().getVictories(game)) * -1);
@@ -183,201 +245,91 @@ public class RankingCommand extends BaseCommand {
 
     private String makeGroupTitle(List<Group> groups, String game) {
         return plugin.getLang("groups-ranking.title")
-                .replaceAll("%name-title", getNameTitle())
-                .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
-                .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                                                         getGroupsVictoriesTitle().length()))
-                .replaceAll("%v-title", getGroupsVictoriesTitle())
-                .replaceAll("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                                                         getGroupsKillsTitle().length()))
-                .replaceAll("%k-title", getGroupsKillsTitle())
-                .replaceAll("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                                                              getGroupsDeathsTitle().length()))
-                .replaceAll("%deaths-title", getGroupsDeathsTitle())
-                .replaceAll("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
-                                                               - getDefeatsTitle().length()))
-                .replaceAll("%defeats-title", getDefeatsTitle());
+                .replace("%name-title", getNameTitle())
+                .replace("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
+                .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
+                                                      getGroupsVictoriesTitle().length()))
+                .replace("%v-title", getGroupsVictoriesTitle())
+                .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
+                                                      getGroupsKillsTitle().length()))
+                .replace("%k-title", getGroupsKillsTitle())
+                .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
+                                                           getGroupsDeathsTitle().length()))
+                .replace("%deaths-title", getGroupsDeathsTitle())
+                .replace("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
+                                                            - getDefeatsTitle().length()))
+                .replace("%defeats-title", getDefeatsTitle());
     }
 
     private String makeWarriorTitle(final List<Warrior> warriors, final String game) {
         return plugin.getLang("players-ranking.title")
-                .replaceAll("%nickname-title", getNicknameTitle())
-                .replaceAll("%v-title", getVictoriesTitle())
-                .replaceAll("%k-title", getKillsTitle())
-                .replaceAll("%d-title", getDeathsTitle())
-                .replaceAll("%n-space", Helper.getSpaces(getNickSize(warriors) - getNicknameTitle().length()))
-                .replaceAll("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - getVictoriesTitle().length()))
-                .replaceAll("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - getKillsTitle().length()))
-                .replaceAll("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - getDeathsTitle().length()));
+                .replace("%nickname-title", getNicknameTitle())
+                .replace("%v-title", getVictoriesTitle())
+                .replace("%k-title", getKillsTitle())
+                .replace("%d-title", getDeathsTitle())
+                .replace("%n-space", Helper.getSpaces(getNickSize(warriors) - getNicknameTitle().length()))
+                .replace("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - getVictoriesTitle().length()))
+                .replace("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - getKillsTitle().length()))
+                .replace("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - getDeathsTitle().length()));
     }
 
-    private String makeGroupLine(Group g, final String game, String line, int pos, List<Group> groups) {
+    private String makeGroupLine(LineElement<Group> lineElement) {
+        String line = plugin.getLang("groups-ranking.line");
+
+        List<Group> groups = lineElement.list;
+        Group g = lineElement.data;
+        String game = lineElement.gameName;
         String name = g.getName();
 
         final int victories = g.getData().getVictories(game);
         final int kills = g.getData().getKills(game);
         final int deaths = g.getData().getDeaths(game);
         final int defeats = g.getData().getDefeats(game);
-        return line.replaceAll("%position", String.valueOf(pos))
-                .replaceAll("%name", name)
-                .replaceAll("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
-                .replaceAll("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                                                         Helper.getLength(victories)))
-                .replaceAll("%victories", String.valueOf(victories))
-                .replaceAll("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                                                         Helper.getLength(kills)))
-                .replaceAll("%kills", String.valueOf(kills))
-                .replaceAll("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                                                              Helper.getLength(deaths)))
-                .replaceAll("%deaths", String.valueOf(deaths))
-                .replaceAll("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
-                                                               Helper.getLength(defeats)))
-                .replaceAll("%defeats", String.valueOf(defeats));
+        return line.replace("%position", lineElement.pos)
+                .replace("%name", name)
+                .replace("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
+                .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
+                                                      Helper.getLength(victories)))
+                .replace("%victories", String.valueOf(victories))
+                .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
+                                                      Helper.getLength(kills)))
+                .replace("%kills", String.valueOf(kills))
+                .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
+                                                           Helper.getLength(deaths)))
+                .replace("%deaths", String.valueOf(deaths))
+                .replace("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
+                                                            Helper.getLength(defeats)))
+                .replace("%defeats", String.valueOf(defeats));
     }
 
-    private String makeWarriorLine(String line, int pos, Warrior w, String game, List<Warrior> warriors) {
+    private String makeWarriorLine(LineElement<Warrior> lineElement) {
+        String line = plugin.getLang("players-ranking.line");
+
+        List<Warrior> warriors = lineElement.list;
+        Warrior w = lineElement.data;
+        String game = lineElement.gameName;
+
         String name = w.getName();
         int victories = w.getVictories(game);
         int kills = w.getKills(game);
         int deaths = w.getDeaths(game);
 
-        return line.replaceAll("%position", String.valueOf(pos))
-                .replaceAll("%nick", name)
-                .replaceAll("%n-space", Helper.getSpaces(getNickSize(warriors) - name.length()))
-                .replaceAll("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - Helper.getLength(victories)))
-                .replaceAll("%victories", String.valueOf(victories))
-                .replaceAll("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - Helper.getLength(kills)))
-                .replaceAll("%kills", String.valueOf(kills))
-                .replaceAll("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - Helper.getLength(deaths)))
-                .replaceAll("%deaths", String.valueOf(deaths));
+        return line.replace("%position", lineElement.pos)
+                .replace("%nick", name)
+                .replace("%n-space", Helper.getSpaces(getNickSize(warriors) - name.length()))
+                .replace("%v-space", Helper.getSpaces(getVictoriesSize(warriors, game) - Helper.getLength(victories)))
+                .replace("%victories", String.valueOf(victories))
+                .replace("%k-space", Helper.getSpaces(getKillsSize(warriors, game) - Helper.getLength(kills)))
+                .replace("%kills", String.valueOf(kills))
+                .replace("%d-space", Helper.getSpaces(getDeathsSize(warriors, game) - Helper.getLength(deaths)))
+                .replace("%deaths", String.valueOf(deaths));
     }
 
-    @Subcommand("%ranking|ranking %groups|groups")
-    @CommandPermission("titansbattle.ranking")
-    @CommandCompletion("@games @order_by:type=group @pages:type=group")
-    @Description("{@@command.description.ranking.groups}")
-    public void groupsRanking(CommandSender sender,
-                              @Values("@games") String game,
-                              @Values("@order_by:type=group") @Optional @Nullable String order,
-                              @Optional @Default("1") int page) {
-
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            final List<Group> groups;
-            if (plugin.getGroupManager() != null) {
-                groups = new ArrayList<>(plugin.getGroupManager().getGroups());
-            } else {
-                groups = new ArrayList<>(0);
-            }
-            if (groups.isEmpty()) {
-                sender.sendMessage(plugin.getLang("no-data-found"));
-                return;
-            }
-
-            sortGroups(groups, game, order);
-
-            java.util.Optional<Result> result = getResult(sender, page, groups);
-            if (!result.isPresent()) return;
-
-            if (groups.size() <= result.get().first) {
-                sender.sendMessage(plugin.getLang("inexistent-page"));
-                return;
-            }
-
-            String line = plugin.getLang("groups-ranking.line");
-            List<String> groupsList = new ArrayList<>();
-
-            for (int i = result.get().first; i <= result.get().last; i++) {
-                int pos = i + 1;
-                Group g;
-                try {
-                    g = groups.get(i);
-                } catch (IndexOutOfBoundsException ex) {
-                    g = null;
-                }
-                if (g == null) {
-                    break;
-                }
-                groupsList.add(makeGroupLine(g, game, line, pos, groups));
-            }
-
-            sender.sendMessage(makeGroupTitle(groups, game));
-
-            if (!groupsList.isEmpty()) {
-                for (String s : groupsList) {
-                    sender.sendMessage(s);
-                }
-            }
-        });
+    static class LineElement<T> {
+        String gameName;
+        List<T> list;
+        T data;
+        String pos;
     }
 
-    @Subcommand("%ranking|ranking %players|players")
-    @CommandPermission("titansbattle.ranking")
-    @CommandCompletion("@games @order_by:type=warrior @pages:type=warrior")
-    @Description("{@@command.description.ranking.players}")
-    public void playersRanking(CommandSender sender,
-                               @Values("@games") String game,
-                               @Values("@order_by:type=warrior") @Optional @Nullable String order,
-                               @Optional @Default("1") int page) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            final List<Warrior> warriors = new ArrayList<>(databaseManager.getWarriors());
-            if (warriors.isEmpty()) {
-                sender.sendMessage(plugin.getLang("no-data-found"));
-                return;
-            }
-
-            sortWarriors(warriors, game, order);
-
-            java.util.Optional<Result> result = getResult(sender, page, warriors);
-            if (!result.isPresent()) return;
-
-            String line = plugin.getLang("players-ranking.line");
-            List<String> warriosList = new ArrayList<>();
-            for (int i = result.get().first; i <= result.get().last; i++) {
-                int pos = i + 1;
-                Warrior w;
-                try {
-                    w = warriors.get(i);
-                } catch (IndexOutOfBoundsException ex) {
-                    w = null;
-                }
-                if (w == null) {
-                    break;
-                }
-                warriosList.add(makeWarriorLine(line, pos, w, game, warriors));
-                sender.sendMessage(makeWarriorLine(line, pos, w, game, warriors));
-            }
-
-            sender.sendMessage(makeWarriorTitle(warriors, game));
-
-            if (!warriosList.isEmpty()) {
-                for (String s : warriosList) {
-                    sender.sendMessage(s);
-                }
-            }
-        });
-    }
-
-    @NotNull
-    private java.util.Optional<Result> getResult(CommandSender sender, int page, @NotNull List<?> list) {
-        int first = (page == 1) ? 0 : ((page - 1) * limit);
-        int last = first + (limit - 1);
-
-        if (list.size() <= first) {
-            sender.sendMessage(plugin.getLang("inexistent-page"));
-            return java.util.Optional.empty();
-        }
-
-        return java.util.Optional.of(new Result(first, last));
-    }
-
-    private static class Result {
-        public final int first;
-        public final int last;
-
-        @Contract(pure = true)
-        public Result(int first, int last) {
-            this.first = first;
-            this.last = last;
-        }
-    }
 }
