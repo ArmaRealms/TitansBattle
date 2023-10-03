@@ -1,15 +1,7 @@
 package me.roinujnosde.titansbattle.commands;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Dependency;
-import co.aikar.commands.annotation.Description;
-import co.aikar.commands.annotation.Optional;
-import co.aikar.commands.annotation.Subcommand;
-import co.aikar.commands.annotation.Values;
+import co.aikar.commands.annotation.*;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
@@ -97,7 +89,7 @@ public class RankingCommand extends BaseCommand {
             element.gameName = gameName;
             element.list = list;
             element.data = list.get(i);
-            element.pos = String.format("% 2d", (page - 1) * configManager.getPageLimitRanking() + i + 1);
+            element.pos = String.format("%2d", (page - 1) * configManager.getPageLimitRanking() + i + 1);
             sender.sendMessage(lineFunction.apply(element));
         }
     }
@@ -248,16 +240,16 @@ public class RankingCommand extends BaseCommand {
                 .replace("%name-title", getNameTitle())
                 .replace("%n-space", Helper.getSpaces(getNameSize(groups) - getNameTitle().length()))
                 .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                                                      getGroupsVictoriesTitle().length()))
+                        getGroupsVictoriesTitle().length()))
                 .replace("%v-title", getGroupsVictoriesTitle())
                 .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                                                      getGroupsKillsTitle().length()))
+                        getGroupsKillsTitle().length()))
                 .replace("%k-title", getGroupsKillsTitle())
                 .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                                                           getGroupsDeathsTitle().length()))
+                        getGroupsDeathsTitle().length()))
                 .replace("%deaths-title", getGroupsDeathsTitle())
                 .replace("%defeats-space", Helper.getSpaces(getGroupsDeathsSize(groups, game)
-                                                            - getDefeatsTitle().length()))
+                        - getDefeatsTitle().length()))
                 .replace("%defeats-title", getDefeatsTitle());
     }
 
@@ -289,16 +281,16 @@ public class RankingCommand extends BaseCommand {
                 .replace("%name", name)
                 .replace("%n-space", Helper.getSpaces(getNameSize(groups) - name.length()))
                 .replace("%v-space", Helper.getSpaces(getGroupsVictoriesSize(groups, game) -
-                                                      Helper.getLength(victories)))
+                        Helper.getLength(victories)))
                 .replace("%victories", String.valueOf(victories))
                 .replace("%k-space", Helper.getSpaces(getGroupsKillsSize(groups, game) -
-                                                      Helper.getLength(kills)))
+                        Helper.getLength(kills)))
                 .replace("%kills", String.valueOf(kills))
                 .replace("%deaths-space", Helper.getSpaces(getGroupsDeathsSize(groups, game) -
-                                                           Helper.getLength(deaths)))
+                        Helper.getLength(deaths)))
                 .replace("%deaths", String.valueOf(deaths))
                 .replace("%defeats-space", Helper.getSpaces(getDefeatsSize(groups, game) -
-                                                            Helper.getLength(defeats)))
+                        Helper.getLength(defeats)))
                 .replace("%defeats", String.valueOf(defeats));
     }
 
