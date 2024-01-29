@@ -32,7 +32,6 @@ import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.Helper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,7 +45,7 @@ public class PlayerDeathListener extends TBListener {
         super(plugin);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler
     public void onDeath(PlayerDeathEvent event) {
         GameManager gm = plugin.getGameManager();
         DatabaseManager databaseManager = plugin.getDatabaseManager();

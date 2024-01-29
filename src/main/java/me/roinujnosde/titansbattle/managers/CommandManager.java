@@ -105,7 +105,6 @@ public class CommandManager extends PaperCommandManager {
 
     private void registerCommands() {
         registerCommand(new TBCommands());
-        registerCommand(new RankingCommand());
         registerCommand(new ChallengeCommand());
         registerCommand(new ConfigCommands());
         registerCommand(new RankingCommand());

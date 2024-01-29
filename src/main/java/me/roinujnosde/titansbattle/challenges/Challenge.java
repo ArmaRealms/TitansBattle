@@ -7,7 +7,6 @@ import me.roinujnosde.titansbattle.events.PlayerWinEvent;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +42,7 @@ public class Challenge extends BaseGame {
 
     @Override
     protected void onLobbyEnd() {
-        broadcastKey("game_started", getConfig().getPreparationTime(), getConfig().getName());
+        broadcastKey("game_started", getConfig().getPreparationTime());
         teleportToArena(getParticipants());
         startPreparation();
     }
