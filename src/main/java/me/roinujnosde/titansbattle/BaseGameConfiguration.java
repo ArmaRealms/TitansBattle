@@ -85,8 +85,6 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     protected Integer borderInterval = 120;
     @Path("worldborder.damage")
     protected Double borderDamage = 5.0;
-    @Path("cancel-block-interact")
-    protected Boolean cancelBlockInteract = true;
 
     public @NotNull FileConfiguration getFileConfiguration() {
         if (fileConfiguration == null) {
@@ -273,10 +271,6 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
 
     public Double getBorderDamage() {
         return borderDamage;
-    }
-
-    public Boolean isCancelBlockInteract() {
-        return cancelBlockInteract;
     }
 
     public Prizes getPrizes(@NotNull Prize prize) {
