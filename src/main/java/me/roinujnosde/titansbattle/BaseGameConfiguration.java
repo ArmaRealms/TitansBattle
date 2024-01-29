@@ -85,6 +85,8 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     protected Integer borderInterval = 120;
     @Path("worldborder.damage")
     protected Double borderDamage = 5.0;
+    @Path("cancel-block-interact")
+    protected Boolean cancelBlockInteract = true;
 
     public @NotNull FileConfiguration getFileConfiguration() {
         if (fileConfiguration == null) {
@@ -288,6 +290,10 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
             map.put(p.name(), new Prizes());
         }
         return map;
+    }
+
+    public boolean isCancelBlockInteract() {
+        return cancelBlockInteract;
     }
 
     public enum Prize implements ConfigurationSerializable {
