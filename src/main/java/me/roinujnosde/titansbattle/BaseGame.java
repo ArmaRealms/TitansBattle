@@ -329,7 +329,7 @@ public abstract class BaseGame {
         }
         message = MessageFormat.format(message, args);
         if (message.startsWith("!!broadcast")) {
-            Bukkit.broadcastMessage(message.replace("!!broadcast", ""));
+            Bukkit.broadcast(message.replace("!!broadcast", ""), "titansbattle.broadcast");
         } else {
             for (Warrior warrior : getParticipants()) {
                 warrior.sendMessage(message);
