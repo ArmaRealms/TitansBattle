@@ -282,17 +282,16 @@ public class Helper {
      * @return the attacker/killer or null
      */
     public static @Nullable Player getPlayerAttackerOrKiller(Entity entity) {
-        Player investigated = null;
-        if (entity instanceof Player) {
-            investigated = (Player) entity;
+        if (entity instanceof Player player) {
+            return player;
         }
-        if (entity instanceof Projectile) {
-            ProjectileSource shooter = ((Projectile) entity).getShooter();
-            if (shooter instanceof Player) {
-                investigated = (Player) shooter;
+        if (entity instanceof Projectile projectile) {
+            ProjectileSource shooter = projectile.getShooter();
+            if (shooter instanceof Player playerShooter) {
+                return playerShooter;
             }
         }
-        return investigated;
+        return null;
     }
 
     /**
