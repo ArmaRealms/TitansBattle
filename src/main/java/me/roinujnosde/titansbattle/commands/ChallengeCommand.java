@@ -3,7 +3,6 @@ package me.roinujnosde.titansbattle.commands;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
-import co.aikar.commands.bukkit.contexts.OnlinePlayer;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.challenges.*;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@CommandAlias("%clanx1|clanx1")
+@CommandAlias("%x1clan|duelclan|duelarclan")
 public class ChallengeCommand extends BaseCommand {
 
     @Dependency
@@ -32,24 +31,6 @@ public class ChallengeCommand extends BaseCommand {
     private DatabaseManager databaseManager;
     @Dependency
     private ConfigurationDao configDao;
-
-    @Subcommand("%player|player")
-    @CommandCompletion("@players @arenas:group=false")
-    @Conditions("can_challenge:group=false")
-    @CommandPermission("titansbattle.challenge.player")
-    @Description("{@@command.description.challenge.player}")
-    public void challengePlayer(Warrior challenger, @Conditions("other") OnlinePlayer target,
-            @Conditions("ready:group=false|empty_inventory") ArenaConfiguration arena) {
-        Challenge challenge = new Challenge(plugin, arena);
-        Warrior challenged = databaseManager.getWarrior(target.player);
-        WarriorChallengeRequest request = new WarriorChallengeRequest(challenge, challenger, challenged);
-
-        challengeManager.add(request);
-
-        challenger.sendMessage(plugin.getLang("you.challenged.player", challenge, target.player.getName()));
-        target.player.sendMessage(plugin.getLang("challenged.you", challenge, challenger.getName()));
-        challenge.onChallengeJoin(challenger);
-    }
 
     @Subcommand("%challenge|challenge")
     @CommandCompletion("@groups @arenas:group=true")
@@ -66,12 +47,10 @@ public class ChallengeCommand extends BaseCommand {
         challengeManager.add(request);
 
         sender.sendMessage(plugin.getLang("you.challenged.group", challenge, target.getName()));
-        String msgRivals = plugin.getLang("challenged.your.group", challenge, challenger.getName(),
-                challenger.getUniqueName());
+        String msgRivals = plugin.getLang("challenged.your.group", challenge, challenger.getName(), challenger.getUniqueName());
         //noinspection ConstantConditions
         plugin.getGroupManager().getWarriors(target).forEach(w -> w.sendMessage(msgRivals));
-        String msgOwn = plugin.getLang("your.group.challenged", challenge, challenger.getUniqueName(),
-                target.getName());
+        String msgOwn = plugin.getLang("your.group.challenged", challenge, challenger.getUniqueName(), target.getName());
         Set<Warrior> members = plugin.getGroupManager().getWarriors(challenger);
         members.remove(sender);
         members.forEach(w -> w.sendMessage(msgOwn));
@@ -103,7 +82,7 @@ public class ChallengeCommand extends BaseCommand {
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
 
-    @Subcommand("%watch|watch")
+    @Subcommand("%spec|spec|spectate")
     @CommandPermission("titansbattle.challenge.watch")
     @CommandCompletion("@arenas:in_use")
     @Description("{@@command.description.challenge.watch}")
