@@ -36,10 +36,9 @@ public class EntityDamageListener extends TBListener {
     public void onDamage(EntityDamageEvent event) {
         DatabaseManager dm = plugin.getDatabaseManager();
 
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player defender)) {
             return;
         }
-        Player defender = (Player) event.getEntity();
         BaseGame game = plugin.getBaseGameFrom(defender);
         if (game == null) {
             return;
@@ -91,8 +90,8 @@ public class EntityDamageListener extends TBListener {
     }
 
     private boolean isParticipant(Entity entity) {
-        if (entity instanceof Player) {
-            return plugin.getBaseGameFrom((Player) entity) != null;
+        if (entity instanceof Player player) {
+            return plugin.getBaseGameFrom(player) != null;
         }
         return false;
     }
