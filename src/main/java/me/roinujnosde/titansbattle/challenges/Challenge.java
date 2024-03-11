@@ -113,7 +113,7 @@ public class Challenge extends BaseGame {
         }
         if (getConfig().isGroupMode()) {
             winnerGroup = getGroup(warrior);
-            winners = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId())).collect(Collectors.toList());
+            winners = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId())).toList();
         } else {
             winners.add(warrior);
         }

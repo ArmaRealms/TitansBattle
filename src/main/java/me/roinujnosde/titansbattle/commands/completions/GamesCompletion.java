@@ -22,6 +22,6 @@ public class GamesCompletion extends AbstractCompletion {
     @Override
     public Collection<String> getCompletions(BukkitCommandCompletionContext context) throws InvalidCommandArgument {
         return getConfigurationDao().getConfigurations(GameConfiguration.class).stream()
-                .map(GameConfiguration::getName).collect(Collectors.toList());
+                .map(GameConfiguration::getName).toList();
     }
 }

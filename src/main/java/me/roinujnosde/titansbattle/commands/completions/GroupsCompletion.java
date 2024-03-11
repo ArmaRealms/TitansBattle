@@ -24,6 +24,6 @@ public class GroupsCompletion extends AbstractCompletion {
     public Collection<String> getCompletions(BukkitCommandCompletionContext context) throws InvalidCommandArgument {
         if (getGroupManager() == null)
             return Collections.emptyList();
-        return getGroupManager().getGroups().stream().map(Group::getUniqueName).collect(Collectors.toList());
+        return getGroupManager().getGroups().stream().map(Group::getUniqueName).toList();
     }
 }

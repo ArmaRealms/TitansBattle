@@ -56,7 +56,7 @@ public class EliminationTournamentGame extends Game {
     private List<Warrior> getDuelLosers(@NotNull Warrior defeated) {
         Group group = getGroup(defeated);
         if (group != null && getConfig().isGroupMode()) {
-            return casualties.stream().filter(p -> group.isMember(p.getUniqueId())).collect(Collectors.toList());
+            return casualties.stream().filter(p -> group.isMember(p.getUniqueId())).toList();
         }
         return Collections.singletonList(defeated);
     }
@@ -66,7 +66,7 @@ public class EliminationTournamentGame extends Game {
         if (getConfig().isGroupMode()) {
             Group winnerGroup = Objects.requireNonNull(groupDuelists.get(0).getOther(getGroup(defeated)));
             list = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId()))
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             Warrior other = playerDuelists.get(0).getOther(defeated);
             list.add(other);
@@ -287,7 +287,7 @@ public class EliminationTournamentGame extends Game {
 
     @NotNull
     private List<Group> getWaitingThirdPlaceGroups() {
-        return waitingThirdPlace.stream().map(this::getGroup).distinct().collect(Collectors.toList());
+        return waitingThirdPlace.stream().map(this::getGroup).distinct().toList();
     }
 
     private void generateDuelists() {
@@ -350,7 +350,7 @@ public class EliminationTournamentGame extends Game {
 
     @Override
     public @NotNull Collection<Warrior> getCurrentFighters() {
-        return getParticipants().stream().filter(this::isCurrentDuelist).collect(Collectors.toList());
+        return getParticipants().stream().filter(this::isCurrentDuelist).toList();
     }
 
     private void informOtherDuelists() {
@@ -376,7 +376,7 @@ public class EliminationTournamentGame extends Game {
                     }
                 }
                 return false;
-            }).collect(Collectors.toList());
+            }).toList();
             teleportToArena(warriors);
         }
     }
@@ -401,7 +401,7 @@ public class EliminationTournamentGame extends Game {
             if (group != null) {
                 name = group.getName();
             }
-        } else if (warriors != null && warriors.size() > 0) {
+        } else if (warriors != null && !warriors.isEmpty()) {
             name = warriors.get(0).getName();
         }
         return name;
@@ -418,31 +418,37 @@ public class EliminationTournamentGame extends Game {
         }
         if (getConfig().isGroupMode() && firstGroup != null) {
             casualties.stream().filter(firstGroup::isMember).forEach(firstPlaceWinners::add);
-            firstPlaceWinners = firstPlaceWinners.stream().distinct().collect(Collectors.toList());
+            firstPlaceWinners = firstPlaceWinners.stream().distinct().toList();
             todayWinners.setWinnerGroup(getConfig().getName(), firstGroup.getName());
             GroupWinEvent event = new GroupWinEvent(firstGroup);
             Bukkit.getPluginManager().callEvent(event);
         }
+
         PlayerWinEvent event = new PlayerWinEvent(this, firstPlaceWinners);
         Bukkit.getPluginManager().callEvent(event);
+
         todayWinners.setWinners(getConfig().getName(), Helper.warriorListToUuidList(firstPlaceWinners));
         givePrizes(FIRST, firstGroup, firstPlaceWinners);
         givePrizes(SECOND, getAnyGroup(secondPlaceWinners), secondPlaceWinners);
         givePrizes(THIRD, getAnyGroup(thirdPlaceWinners), thirdPlaceWinners);
         SoundUtils.playSound(SoundUtils.Type.VICTORY, plugin.getConfig(), firstPlaceWinners, secondPlaceWinners,
                 thirdPlaceWinners);
+
         Warrior killer = findKiller();
         if (killer != null) {
-            givePrizes(KILLER, null, Collections.singletonList(killer));
+            givePrizes(KILLER, null, List.of(killer));
             gameManager.setKiller(getConfig(), killer, null);
             SoundUtils.playSound(SoundUtils.Type.VICTORY, plugin.getConfig(), killer.toOnlinePlayer());
             discordAnnounce("discord_who_won_killer", killer.getName(), killsCount.get(killer));
             todayWinners.setKiller(getConfig().getName(), killer.getUniqueId());
         }
+
         broadcastKey("who_won_tournament", getWinnerName(firstPlaceWinners),
                 getWinnerName(secondPlaceWinners), getWinnerName(thirdPlaceWinners));
+
         discordAnnounce("discord_who_won_tournament", getWinnerName(firstPlaceWinners),
                 getWinnerName(secondPlaceWinners), getWinnerName(thirdPlaceWinners));
+
         firstPlaceWinners.forEach(warrior -> warrior.increaseVictories(getConfig().getName()));
     }
 

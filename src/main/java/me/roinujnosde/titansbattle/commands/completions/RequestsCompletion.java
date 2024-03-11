@@ -24,6 +24,6 @@ public class RequestsCompletion extends AbstractCompletion {
     public Collection<String> getCompletions(BukkitCommandCompletionContext context) throws InvalidCommandArgument {
         Warrior warrior = getDatabaseManager().getWarrior(context.getIssuer().getUniqueId());
         return getChallengeManager().getRequests().stream().filter(cr -> cr.isInvited(warrior))
-                .map(ChallengeRequest::getChallengerName).collect(Collectors.toList());
+                .map(ChallengeRequest::getChallengerName).toList();
     }
 }

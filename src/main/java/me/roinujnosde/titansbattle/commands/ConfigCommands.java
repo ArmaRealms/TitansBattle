@@ -64,7 +64,7 @@ public class ConfigCommands extends BaseCommand {
     private void setPrize(Player sender, BaseGameConfiguration config, Prize prize, PrizeReceiver receiver) {
         Prizes prizes = config.getPrizes(prize);
         List<ItemStack> items = Arrays.stream(sender.getInventory().getContents()).filter(Objects::nonNull)
-                .filter(item -> item.getType() != Material.AIR).collect(Collectors.toList());
+                .filter(item -> item.getType() != Material.AIR).toList();
         switch (receiver) {
             case LEADERS:
                 prizes.setLeaderItems(items);

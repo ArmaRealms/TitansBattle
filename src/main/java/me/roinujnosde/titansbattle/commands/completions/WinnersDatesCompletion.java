@@ -25,6 +25,6 @@ public class WinnersDatesCompletion extends AbstractCompletion {
         SimpleDateFormat dateFormat = new SimpleDateFormat(getConfigManager().getDateFormat());
 
         return getDatabaseManager().getWinners().stream().map(Winners::getDate).map(dateFormat::format)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

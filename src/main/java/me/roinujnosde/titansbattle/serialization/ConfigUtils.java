@@ -70,7 +70,7 @@ public class ConfigUtils {
 
     public static List<String> getEditableFields(@NotNull Class<?> clazz) {
         return getFields(clazz).stream().filter(ConfigUtils::isEditable).map(Field::getName)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static String getPath(Field field) {

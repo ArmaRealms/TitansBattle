@@ -177,7 +177,7 @@ public class Helper {
 
     @NotNull
     public static List<UUID> warriorListToUuidList(@NotNull List<Warrior> players) {
-        return players.stream().map(Warrior::getUniqueId).collect(Collectors.toList());
+        return players.stream().map(Warrior::getUniqueId).toList();
     }
 
     /**
