@@ -52,6 +52,7 @@ commands:
     setwinner: "setwinner"
     config: "config"
     x1clan: "x1clan"
+    spec: "spec"
 
 #Sounds used in games, to disable one leave it ""
 sounds:
