@@ -314,18 +314,18 @@ public class DatabaseManager {
     }
 
     @NotNull
-    public Warrior getWarrior(@NotNull OfflinePlayer player) {
-        UUID uuid = player.getUniqueId();
+    public Warrior getWarrior(@NotNull OfflinePlayer offlinePlayer) {
+        UUID uuid = offlinePlayer.getUniqueId();
         for (Warrior warrior : warriors) {
             if (warrior.toPlayer().getUniqueId().equals(uuid)) {
-                if (player instanceof Player) {
-                    warrior.setOnlinePlayer((Player) player);
+                if (offlinePlayer instanceof Player player) {
+                    warrior.setOnlinePlayer(player);
                 }
                 return warrior;
             }
         }
 
-        Warrior warrior = new Warrior(player, plugin::getGroupManager);
+        Warrior warrior = new Warrior(offlinePlayer, plugin::getGroupManager);
         warriors.add(warrior);
         return warrior;
     }

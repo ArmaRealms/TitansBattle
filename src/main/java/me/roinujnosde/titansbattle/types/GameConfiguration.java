@@ -150,8 +150,8 @@ public class GameConfiguration extends BaseGameConfiguration {
 
     @Override
     public boolean equals(@Nullable Object other) {
-        if (other instanceof GameConfiguration) {
-            return getName().equals(((GameConfiguration) other).getName());
+        if (other instanceof GameConfiguration config) {
+            return getName().equals(config.getName());
         }
         return false;
     }
