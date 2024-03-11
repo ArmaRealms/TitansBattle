@@ -388,7 +388,7 @@ public abstract class BaseGame {
 
     protected void givePrizes(Prize prize, @Nullable Group group, @Nullable List<Warrior> warriors) {
         List<Player> leaders = new ArrayList<>();
-        List<Player> members = new ArrayList<>();
+        List<Player> members;
         if (warriors == null) {
             return;
         }
@@ -398,6 +398,7 @@ public abstract class BaseGame {
                 .toList();
 
         if (group != null) {
+            members = new ArrayList<>();
             for (Player p : players) {
                 if (group.isLeaderOrOfficer(p.getUniqueId())) {
                     leaders.add(p);
@@ -406,7 +407,7 @@ public abstract class BaseGame {
                 }
             }
         } else {
-            members = players;
+            members = new ArrayList<>(players);
         }
         getConfig().getPrizes(prize).give(plugin, leaders, members);
     }
