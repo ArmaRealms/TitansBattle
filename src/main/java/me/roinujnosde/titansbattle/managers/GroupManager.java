@@ -76,8 +76,7 @@ public abstract class GroupManager {
      * @return the built String
      */
     public @NotNull String buildStringFrom(@NotNull Collection<Group> groups) {
-        return Helper.buildStringFrom(groups.stream().filter(Objects::nonNull).map(Group::getName)
-                .toList(););
+        return Helper.buildStringFrom(groups.stream().filter(Objects::nonNull).map(Group::getName).toList());
     }
 
 }

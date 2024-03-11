@@ -22,6 +22,10 @@ public class ArenaReadyCondition extends AbstractParameterCondition<ArenaConfigu
     public void validateCondition(ConditionContext<BukkitCommandIssuer> cc,
                                   BukkitCommandExecutionContext cec,
                                   ArenaConfiguration value) throws InvalidCommandArgument {
+        if (value == null) {
+            cc.getIssuer().sendMessage(plugin.getLang("arena.does.not.exist"));
+            throw new ConditionFailedException();
+        }
         boolean matches = getChallengeManager().getRequests().stream().map(ChallengeRequest::getChallenge)
                 .map(Challenge::getConfig).anyMatch(config -> config.equals(value));
         if (matches) {
