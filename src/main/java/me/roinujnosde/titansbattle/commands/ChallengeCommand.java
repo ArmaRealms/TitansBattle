@@ -15,20 +15,17 @@ import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import co.aikar.commands.annotation.Values;
-import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import me.roinujnosde.titansbattle.challenges.Challenge;
 import me.roinujnosde.titansbattle.challenges.ChallengeRequest;
 import me.roinujnosde.titansbattle.challenges.GroupChallengeRequest;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
-import me.roinujnosde.titansbattle.games.Game;
 import me.roinujnosde.titansbattle.managers.ChallengeManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -54,7 +51,7 @@ public class ChallengeCommand extends BaseCommand {
     @Description("{@@command.description.challenge.group}")
     @Syntax("{@@command.sintax.challenge.group}")
     public void challengeGroup(Warrior sender, @Conditions("other") Group target,
-            @Conditions("ready:group=true|empty_inventory") ArenaConfiguration arena) {
+                               @Conditions("ready:group=true|empty_inventory") ArenaConfiguration arena) {
         Challenge challenge = new Challenge(plugin, arena);
         Group challenger = Objects.requireNonNull(sender.getGroup());
         GroupChallengeRequest request = new GroupChallengeRequest(challenge, challenger, target);
@@ -99,18 +96,10 @@ public class ChallengeCommand extends BaseCommand {
 
     @Subcommand("%spec|spec|spectate")
     @CommandPermission("titansbattle.challenge.watch")
-    @CommandCompletion("@arenas:in_use")
+    @CommandCompletion("@arenas:in_use=true")
     @Description("{@@command.description.challenge.watch}")
-    public void watch(Player sender, Game game, @Optional ArenaConfiguration arena) {
-        BaseGameConfiguration config;
-        if (arena == null && game == null) {
-            sender.sendMessage(plugin.getLang("challenge.not-starting-or-started"));
-            return;
-        }
-        config = (arena == null) ? game.getConfig() : arena;
-
-        Location watchroom = config.getWatchroom();
-        sender.teleport(watchroom);
+    public void watch(Player sender, @Conditions("can_spectate") ArenaConfiguration arena) {
+        sender.teleport(arena.getWatchroom());
         sender.sendMessage(plugin.getLang("challenge.teleport-watchroom"));
         SoundUtils.playSound(SoundUtils.Type.WATCH, plugin.getConfig(), sender);
     }
