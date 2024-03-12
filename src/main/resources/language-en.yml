@@ -44,6 +44,7 @@ your.group.challenged: "&a» Your group challenged {1}! Join the battle using /t
 you.challenged.player: "&a» You challenged {0} to a duel!"
 you.challenged.group: "&a» You challenged the group {0} to a battle!"
 arena.does.not.exist: "&c» This arena does not exist!"
+no.challenge.in.arena: "&c» There is no challenge in this arena!"
 arena.in.use: "&c» This arena is already in use!"
 no.challenge.to.accept: "&c» Nothing to accept!"
 already.challenged: "&c» You already challenged someone!"

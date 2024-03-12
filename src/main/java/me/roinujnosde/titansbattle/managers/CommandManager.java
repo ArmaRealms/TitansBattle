@@ -25,6 +25,7 @@ import me.roinujnosde.titansbattle.commands.conditions.AbstractCommandCondition;
 import me.roinujnosde.titansbattle.commands.conditions.AbstractParameterCondition;
 import me.roinujnosde.titansbattle.commands.conditions.ArenaReadyCondition;
 import me.roinujnosde.titansbattle.commands.conditions.CanChallengeCondition;
+import me.roinujnosde.titansbattle.commands.conditions.CanSpectateCondition;
 import me.roinujnosde.titansbattle.commands.conditions.ChallengeCondition;
 import me.roinujnosde.titansbattle.commands.conditions.EmptyInventoryCondition;
 import me.roinujnosde.titansbattle.commands.conditions.GameReadyCondition;
@@ -138,6 +139,7 @@ public class CommandManager extends PaperCommandManager {
         registerCondition(new OtherPlayerCondition(getPlugin()));
         registerCondition(new OtherGroupCondition(getPlugin()));
         registerCondition(new ChallengeCondition(getPlugin()));
+        registerCondition(new CanSpectateCondition(getPlugin()));
     }
 
     private void registerCommands() {
