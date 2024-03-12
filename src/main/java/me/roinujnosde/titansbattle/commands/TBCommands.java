@@ -21,6 +21,7 @@ import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.exceptions.CommandNotSupportedException;
 import me.roinujnosde.titansbattle.games.Game;
+import me.roinujnosde.titansbattle.managers.ChallengeManager;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.managers.GameManager;
@@ -30,6 +31,7 @@ import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.types.Winners;
 import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -49,6 +51,8 @@ public class TBCommands extends BaseCommand {
     private TitansBattle plugin;
     @Dependency
     private GameManager gameManager;
+    @Dependency
+    private ChallengeManager challengeManager;
     @Dependency
     private TaskManager taskManager;
     @Dependency
@@ -113,6 +117,7 @@ public class TBCommands extends BaseCommand {
     @Description("{@@command.description.reload}")
     public void reload(@NotNull CommandSender sender) {
         gameManager.getCurrentGame().ifPresent(game -> game.cancel(sender));
+        challengeManager.getChallenges().forEach(c -> c.cancel(Bukkit.getConsoleSender()));
         plugin.saveDefaultConfig();
         configManager.load();
         plugin.getLanguageManager().reload();
