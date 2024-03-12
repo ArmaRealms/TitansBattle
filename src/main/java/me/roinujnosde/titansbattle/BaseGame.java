@@ -1,6 +1,11 @@
 package me.roinujnosde.titansbattle;
 
-import me.roinujnosde.titansbattle.events.*;
+import me.roinujnosde.titansbattle.events.GameStartEvent;
+import me.roinujnosde.titansbattle.events.GroupDefeatedEvent;
+import me.roinujnosde.titansbattle.events.LobbyStartEvent;
+import me.roinujnosde.titansbattle.events.ParticipantDeathEvent;
+import me.roinujnosde.titansbattle.events.PlayerExitGameEvent;
+import me.roinujnosde.titansbattle.events.PlayerJoinGameEvent;
 import me.roinujnosde.titansbattle.exceptions.CommandNotSupportedException;
 import me.roinujnosde.titansbattle.hooks.papi.PlaceholderHook;
 import me.roinujnosde.titansbattle.managers.GameManager;
@@ -10,7 +15,13 @@ import me.roinujnosde.titansbattle.types.Kit;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.MessageUtils;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -25,14 +36,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize;
-import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.*;
-import static org.bukkit.ChatColor.*;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.ALLY_DEATH;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.BORDER;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.ENEMY_DEATH;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.JOIN_GAME;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.LEAVE_GAME;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.TELEPORT;
+import static org.bukkit.ChatColor.GREEN;
+import static org.bukkit.ChatColor.RED;
+import static org.bukkit.ChatColor.YELLOW;
 
 public abstract class BaseGame {
 

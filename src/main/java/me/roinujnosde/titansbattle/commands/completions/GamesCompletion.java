@@ -7,7 +7,6 @@ import me.roinujnosde.titansbattle.types.GameConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class GamesCompletion extends AbstractCompletion {
     public GamesCompletion(TitansBattle plugin) {

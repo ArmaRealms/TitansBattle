@@ -1,7 +1,16 @@
 package me.roinujnosde.titansbattle.managers;
 
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.listeners.*;
+import me.roinujnosde.titansbattle.listeners.EntityDamageListener;
+import me.roinujnosde.titansbattle.listeners.ItemsProtectionListener;
+import me.roinujnosde.titansbattle.listeners.JoinGameListener;
+import me.roinujnosde.titansbattle.listeners.PlayerCommandPreprocessListener;
+import me.roinujnosde.titansbattle.listeners.PlayerDeathListener;
+import me.roinujnosde.titansbattle.listeners.PlayerJoinListener;
+import me.roinujnosde.titansbattle.listeners.PlayerQuitListener;
+import me.roinujnosde.titansbattle.listeners.PlayerRespawnListener;
+import me.roinujnosde.titansbattle.listeners.PlayerTeleportListener;
+import me.roinujnosde.titansbattle.listeners.TBListener;
 import org.bukkit.event.HandlerList;
 
 import java.util.HashSet;

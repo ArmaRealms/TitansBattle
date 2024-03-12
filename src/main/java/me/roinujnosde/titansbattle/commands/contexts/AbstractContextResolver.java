@@ -4,7 +4,11 @@ import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.contexts.ContextResolver;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
-import me.roinujnosde.titansbattle.managers.*;
+import me.roinujnosde.titansbattle.managers.ChallengeManager;
+import me.roinujnosde.titansbattle.managers.ConfigManager;
+import me.roinujnosde.titansbattle.managers.DatabaseManager;
+import me.roinujnosde.titansbattle.managers.GameManager;
+import me.roinujnosde.titansbattle.managers.GroupManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
