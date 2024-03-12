@@ -5,10 +5,12 @@ import co.aikar.commands.BukkitCommandIssuer;
 import co.aikar.commands.ConditionContext;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.InvalidCommandArgument;
+import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import me.roinujnosde.titansbattle.challenges.Challenge;
 import me.roinujnosde.titansbattle.challenges.ChallengeRequest;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class ArenaReadyCondition extends AbstractParameterCondition<ArenaConfiguration> {
@@ -27,7 +29,7 @@ public class ArenaReadyCondition extends AbstractParameterCondition<ArenaConfigu
                                   BukkitCommandExecutionContext cec,
                                   ArenaConfiguration value) throws InvalidCommandArgument {
         if (value == null) {
-            cc.getIssuer().sendMessage(plugin.getLang("arena.does.not.exist"));
+            cc.getIssuer().sendMessage(plugin.getLang("arena.does.not.exist", getArenas()));
             throw new ConditionFailedException();
         }
         boolean matches = getChallengeManager().getRequests().stream().map(ChallengeRequest::getChallenge)
@@ -50,5 +52,13 @@ public class ArenaReadyCondition extends AbstractParameterCondition<ArenaConfigu
     @Override
     public @NotNull String getId() {
         return "ready";
+    }
+
+    @Contract(" -> new")
+    private @NotNull String getArenas() {
+        return String.join(", ", getConfigurationDao().getConfigurations(ArenaConfiguration.class).stream()
+                .filter(BaseGameConfiguration::isGroupMode)
+                .map(ArenaConfiguration::getName)
+                .toList());
     }
 }
