@@ -1,6 +1,11 @@
 package me.roinujnosde.titansbattle;
 
-import me.roinujnosde.titansbattle.events.*;
+import me.roinujnosde.titansbattle.events.GameStartEvent;
+import me.roinujnosde.titansbattle.events.GroupDefeatedEvent;
+import me.roinujnosde.titansbattle.events.LobbyStartEvent;
+import me.roinujnosde.titansbattle.events.ParticipantDeathEvent;
+import me.roinujnosde.titansbattle.events.PlayerExitGameEvent;
+import me.roinujnosde.titansbattle.events.PlayerJoinGameEvent;
 import me.roinujnosde.titansbattle.exceptions.CommandNotSupportedException;
 import me.roinujnosde.titansbattle.hooks.papi.PlaceholderHook;
 import me.roinujnosde.titansbattle.managers.GameManager;
@@ -10,13 +15,14 @@ import me.roinujnosde.titansbattle.types.Kit;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.MessageUtils;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,14 +31,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize;
-import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.*;
-import static org.bukkit.ChatColor.*;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.ALLY_DEATH;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.BORDER;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.ENEMY_DEATH;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.JOIN_GAME;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.LEAVE_GAME;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.TELEPORT;
+import static org.bukkit.ChatColor.GREEN;
+import static org.bukkit.ChatColor.RED;
+import static org.bukkit.ChatColor.YELLOW;
 
 public abstract class BaseGame {
 
@@ -52,7 +72,7 @@ public abstract class BaseGame {
     private final List<BukkitTask> tasks = new ArrayList<>();
     private LobbyAnnouncementTask lobbyTask;
 
-    public BaseGame(TitansBattle plugin, BaseGameConfiguration config) {
+    protected BaseGame(@NotNull TitansBattle plugin, BaseGameConfiguration config) {
         this.plugin = plugin;
         this.groupManager = plugin.getGroupManager();
         this.gameManager = plugin.getGameManager();
@@ -76,8 +96,10 @@ public abstract class BaseGame {
         }
         lobby = true;
         Integer interval = getConfig().getAnnouncementStartingInterval();
-        lobbyTask = new LobbyAnnouncementTask(getConfig().getAnnouncementStartingTimes(), interval);
-        addTask(lobbyTask.runTaskTimer(plugin, 0, interval * 20));
+        Integer startingTimes = getConfig().getAnnouncementStartingTimes();
+        lobbyTask = new LobbyAnnouncementTask(startingTimes, interval);
+        addTask(lobbyTask.runTaskTimer(plugin, 0, interval * 20L));
+        addTask(new LobbyWantingAnnouncementTask((startingTimes + 1L) * interval).runTaskTimerAsynchronously(plugin, 0, 20L));
     }
 
     public void finish(boolean cancelled) {
@@ -205,8 +227,6 @@ public abstract class BaseGame {
             plugin.getConfigManager().getClearInventory().add(warrior.getUniqueId());
         }
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            //processInventoryOnExit(warrior);
-            //onDeath(warrior, getLastAttacker(warrior));
             Player player = warrior.toOnlinePlayer();
             if (player != null) {
                 player.setHealth(0);
@@ -229,49 +249,12 @@ public abstract class BaseGame {
         }
         Player player = Objects.requireNonNull(warrior.toOnlinePlayer());
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            //processInventoryOnExit(warrior);
-            //onDeath(warrior, getLastAttacker(warrior));
             player.setHealth(0);
             return;
         }
         player.sendMessage(getLang("you-have-left"));
         SoundUtils.playSound(LEAVE_GAME, plugin.getConfig(), player);
         processPlayerExit(warrior);
-    }
-
-    protected @Nullable Warrior getLastAttacker(@NotNull Warrior victim) {
-        Player player = victim.toOnlinePlayer();
-        EntityDamageEvent event = player != null ? player.getLastDamageCause() : null;
-        if (event instanceof EntityDamageByEntityEvent entityDamageByEntityEvent) {
-            Entity attacker = entityDamageByEntityEvent.getDamager();
-            if (attacker instanceof Player playerAttacker) {
-                return plugin.getDatabaseManager().getWarrior(playerAttacker);
-            }
-            if (attacker instanceof Projectile projectile && projectile.getShooter() instanceof Player shooter) {
-                return plugin.getDatabaseManager().getWarrior(shooter);
-            }
-        }
-        return null;
-    }
-
-    protected void processInventoryOnExit(@NotNull Warrior warrior) {
-        Player player = warrior.toOnlinePlayer();
-        if (player == null) {
-            plugin.debug("processInventoryOnExit() -> null player");
-            return;
-        }
-        World world = player.getWorld();
-        if (shouldKeepInventoryOnDeath(warrior) || Boolean.parseBoolean(world.getGameRuleValue("keepInventory"))) {
-            return;
-        }
-        if (shouldClearDropsOnDeath(warrior)) {
-            return;
-        }
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
-            world.dropItemNaturally(player.getLocation(), item.clone());
-        }
-        Kit.clearInventory(player);
     }
 
     public void onRespawn(@NotNull Warrior warrior) {
@@ -622,6 +605,16 @@ public abstract class BaseGame {
         }
     }
 
+    private ChatColor getColor(long timer) {
+        ChatColor color = GREEN;
+        if (timer <= 3) {
+            color = RED;
+        } else if (timer <= 7) {
+            color = YELLOW;
+        }
+        return color;
+    }
+
     public class LobbyAnnouncementTask extends BukkitRunnable {
         private int times;
         private final long interval;
@@ -653,6 +646,27 @@ public abstract class BaseGame {
             }
             this.cancel();
             lobbyTask = null;
+        }
+    }
+
+    public class LobbyWantingAnnouncementTask extends BukkitRunnable {
+        private long seconds;
+
+        public LobbyWantingAnnouncementTask(long seconds) {
+            this.seconds = seconds;
+        }
+
+        @Override
+        public void run() {
+            if (seconds > 0) {
+                seconds--;
+                participants.stream()
+                        .map(Warrior::toOnlinePlayer)
+                        .filter(Objects::nonNull)
+                        .forEach(p -> p.sendTitle(getColor(seconds) + "" + seconds, ""));
+            } else {
+                this.cancel();
+            }
         }
     }
 
@@ -719,7 +733,7 @@ public abstract class BaseGame {
             List<Player> players = warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull).toList();
             String title;
             if (timer > 0) {
-                title = getColor() + "" + timer;
+                title = getColor(timer) + "" + timer;
             } else {
                 title = RED + getLang("title.fight");
                 this.cancel();
@@ -727,16 +741,6 @@ public abstract class BaseGame {
             }
             players.forEach(player -> player.sendTitle(title, ""));
             timer--;
-        }
-
-        private ChatColor getColor() {
-            ChatColor color = GREEN;
-            if (timer <= 3) {
-                color = RED;
-            } else if (timer <= 7) {
-                color = YELLOW;
-            }
-            return color;
         }
     }
 

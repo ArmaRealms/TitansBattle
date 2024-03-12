@@ -4,7 +4,11 @@ import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.events.GroupWinEvent;
 import me.roinujnosde.titansbattle.events.PlayerWinEvent;
 import me.roinujnosde.titansbattle.exceptions.CommandNotSupportedException;
-import me.roinujnosde.titansbattle.types.*;
+import me.roinujnosde.titansbattle.types.GameConfiguration;
+import me.roinujnosde.titansbattle.types.Group;
+import me.roinujnosde.titansbattle.types.Kit;
+import me.roinujnosde.titansbattle.types.Warrior;
+import me.roinujnosde.titansbattle.types.Winners;
 import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
 import org.bukkit.Bukkit;
@@ -14,12 +18,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.*;
+import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.FIRST;
+import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.KILLER;
+import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.SECOND;
+import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.THIRD;
 
 public class EliminationTournamentGame extends Game {
     private final List<Duel<Warrior>> playerDuelists = new ArrayList<>();

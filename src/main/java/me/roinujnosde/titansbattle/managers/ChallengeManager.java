@@ -7,7 +7,11 @@ import me.roinujnosde.titansbattle.types.Warrior;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ChallengeManager {
 
@@ -44,6 +48,15 @@ public class ChallengeManager {
             }
             if (!groupMode && request.getChallenger().equals(challenger)) {
                 return request;
+            }
+        }
+        return null;
+    }
+
+    public Challenge getChallenge(@NotNull String name) {
+        for (Challenge challenge : challenges) {
+            if (challenge.getConfig().getName().equals(name)) {
+                return challenge;
             }
         }
         return null;

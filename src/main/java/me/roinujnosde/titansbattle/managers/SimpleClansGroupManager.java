@@ -1,8 +1,8 @@
 package me.roinujnosde.titansbattle.managers;
 
+import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.types.Group;
 import me.roinujnosde.titansbattle.types.SimpleClansGroup;
-import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.utils.Helper;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;

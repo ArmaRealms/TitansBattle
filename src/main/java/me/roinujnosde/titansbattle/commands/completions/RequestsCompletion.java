@@ -8,7 +8,6 @@ import me.roinujnosde.titansbattle.types.Warrior;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class RequestsCompletion extends AbstractCompletion {
     public RequestsCompletion(TitansBattle plugin) {

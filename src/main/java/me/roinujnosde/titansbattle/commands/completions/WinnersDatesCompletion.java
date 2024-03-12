@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 public class WinnersDatesCompletion extends AbstractCompletion {
     public WinnersDatesCompletion(TitansBattle plugin) {
