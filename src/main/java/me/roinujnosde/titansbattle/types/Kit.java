@@ -153,4 +153,16 @@ public class Kit implements ConfigurationSerializable {
             }
         }
     }
+
+    public ItemStack[] getContentsWithoutNBT() {
+        ItemStack[] items = new ItemStack[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack item = contents[i];
+            if (item != null) {
+                items[i] = item.clone();
+                new NBTItem(items[i], true).removeKey(NBT_TAG);
+            }
+        }
+        return items;
+    }
 }

@@ -72,7 +72,7 @@ public class ConfigCommands extends BaseCommand {
         sender.getInventory().clear();
         Kit kit = config.getKit();
         if (kit != null) {
-            sender.getInventory().setContents(kit.getContents());
+            sender.getInventory().setContents(kit.getContentsWithoutNBT());
         }
     }
 

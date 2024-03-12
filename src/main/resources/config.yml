@@ -53,6 +53,7 @@ commands:
     config: "config"
     x1clan: "x1clan"
     spec: "spec"
+    getkit: "getkit"
 
 #Sounds used in games, to disable one leave it ""
 sounds:
