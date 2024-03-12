@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.CommandAlias;
 import co.aikar.commands.annotation.CommandCompletion;
 import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Conditions;
 import co.aikar.commands.annotation.Dependency;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Subcommand;
@@ -12,6 +13,7 @@ import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.BaseGameConfiguration.Prize;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
+import me.roinujnosde.titansbattle.challenges.Challenge;
 import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.managers.ConfigManager;
 import me.roinujnosde.titansbattle.serialization.ConfigUtils;
@@ -276,9 +278,17 @@ public class ConfigCommands extends BaseCommand {
         @Description("{@@command.description.challenge.setdestination}")
         public void setArenaEntrance(Player player,
                                      @Values("@arenas") ArenaConfiguration arena,
-                                     @Values("ARENA_ENTRANCE") String destination,
                                      @Values("@range:1-2") int index) {
             ConfigCommands.this.setArenaEntrance(player, arena, index);
+        }
+
+        @Subcommand("%cancel|cancel")
+        @CommandPermission("titansbattle.cancel")
+        @Conditions("challenge")
+        @Description("{@@command.description.cancel}")
+        @CommandCompletion("@challenge")
+        public void cancel(CommandSender sender, @Values("@challenge") @NotNull Challenge challenge) {
+            challenge.cancel(sender);
         }
     }
 

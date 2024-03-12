@@ -11,6 +11,7 @@ import me.roinujnosde.titansbattle.commands.TBCommands;
 import me.roinujnosde.titansbattle.commands.completions.AbstractAsyncCompletion;
 import me.roinujnosde.titansbattle.commands.completions.AbstractCompletion;
 import me.roinujnosde.titansbattle.commands.completions.ArenasCompletion;
+import me.roinujnosde.titansbattle.commands.completions.ChallengeCompletion;
 import me.roinujnosde.titansbattle.commands.completions.ConfigFieldsCompletion;
 import me.roinujnosde.titansbattle.commands.completions.DestinationCompletion;
 import me.roinujnosde.titansbattle.commands.completions.GamesCompletion;
@@ -24,6 +25,7 @@ import me.roinujnosde.titansbattle.commands.conditions.AbstractCommandCondition;
 import me.roinujnosde.titansbattle.commands.conditions.AbstractParameterCondition;
 import me.roinujnosde.titansbattle.commands.conditions.ArenaReadyCondition;
 import me.roinujnosde.titansbattle.commands.conditions.CanChallengeCondition;
+import me.roinujnosde.titansbattle.commands.conditions.ChallengeCondition;
 import me.roinujnosde.titansbattle.commands.conditions.EmptyInventoryCondition;
 import me.roinujnosde.titansbattle.commands.conditions.GameReadyCondition;
 import me.roinujnosde.titansbattle.commands.conditions.HappeningCondition;
@@ -35,6 +37,7 @@ import me.roinujnosde.titansbattle.commands.conditions.PlayerParticipantConditio
 import me.roinujnosde.titansbattle.commands.contexts.AbstractContextResolver;
 import me.roinujnosde.titansbattle.commands.contexts.AbstractIssuerOnlyContextResolver;
 import me.roinujnosde.titansbattle.commands.contexts.ArenaConfigurationContext;
+import me.roinujnosde.titansbattle.commands.contexts.ChallengeContext;
 import me.roinujnosde.titansbattle.commands.contexts.ChallengeRequestContext;
 import me.roinujnosde.titansbattle.commands.contexts.DateContext;
 import me.roinujnosde.titansbattle.commands.contexts.GameConfigurationContext;
@@ -97,6 +100,7 @@ public class CommandManager extends PaperCommandManager {
         registerCompletion(new WinnersDatesCompletion(getPlugin()));
         registerCompletion(new DestinationCompletion(getPlugin()));
         registerCompletion(new PrizeCompletion(getPlugin()));
+        registerCompletion(new ChallengeCompletion(getPlugin()));
     }
 
     private void registerContexts() {
@@ -108,6 +112,7 @@ public class CommandManager extends PaperCommandManager {
         registerContext(new ArenaConfigurationContext(getPlugin()));
         registerContext(new GameConfigurationContext(getPlugin()));
         registerContext(new OnlinePlayerContext(getPlugin()));
+        registerContext(new ChallengeContext(getPlugin()));
     }
 
     private void registerReplacements() {
@@ -132,6 +137,7 @@ public class CommandManager extends PaperCommandManager {
         registerCondition(new InvitedCondition(getPlugin()));
         registerCondition(new OtherPlayerCondition(getPlugin()));
         registerCondition(new OtherGroupCondition(getPlugin()));
+        registerCondition(new ChallengeCondition(getPlugin()));
     }
 
     private void registerCommands() {

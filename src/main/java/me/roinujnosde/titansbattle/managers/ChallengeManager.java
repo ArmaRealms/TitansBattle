@@ -53,6 +53,15 @@ public class ChallengeManager {
         return null;
     }
 
+    public Challenge getChallenge(@NotNull String name) {
+        for (Challenge challenge : challenges) {
+            if (challenge.getConfig().getName().equals(name)) {
+                return challenge;
+            }
+        }
+        return null;
+    }
+
     public void add(@NotNull ChallengeRequest<?> request) {
         Challenge challenge = request.getChallenge();
         if (challenges.contains(challenge)) {

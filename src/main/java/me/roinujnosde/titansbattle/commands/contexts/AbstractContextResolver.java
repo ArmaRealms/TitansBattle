@@ -17,7 +17,7 @@ public abstract class AbstractContextResolver<T> implements ContextResolver<T, B
 
     protected final TitansBattle plugin;
 
-    public AbstractContextResolver(@NotNull TitansBattle plugin) {
+    protected AbstractContextResolver(@NotNull TitansBattle plugin) {
         this.plugin = plugin;
     }
 
