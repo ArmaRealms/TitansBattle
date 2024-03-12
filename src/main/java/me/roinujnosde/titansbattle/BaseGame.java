@@ -20,14 +20,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -77,7 +72,7 @@ public abstract class BaseGame {
     private final List<BukkitTask> tasks = new ArrayList<>();
     private LobbyAnnouncementTask lobbyTask;
 
-    public BaseGame(TitansBattle plugin, BaseGameConfiguration config) {
+    protected BaseGame(@NotNull TitansBattle plugin, BaseGameConfiguration config) {
         this.plugin = plugin;
         this.groupManager = plugin.getGroupManager();
         this.gameManager = plugin.getGameManager();
@@ -230,8 +225,6 @@ public abstract class BaseGame {
             plugin.getConfigManager().getClearInventory().add(warrior.getUniqueId());
         }
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            //processInventoryOnExit(warrior);
-            //onDeath(warrior, getLastAttacker(warrior));
             Player player = warrior.toOnlinePlayer();
             if (player != null) {
                 player.setHealth(0);
@@ -254,49 +247,12 @@ public abstract class BaseGame {
         }
         Player player = Objects.requireNonNull(warrior.toOnlinePlayer());
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            //processInventoryOnExit(warrior);
-            //onDeath(warrior, getLastAttacker(warrior));
             player.setHealth(0);
             return;
         }
         player.sendMessage(getLang("you-have-left"));
         SoundUtils.playSound(LEAVE_GAME, plugin.getConfig(), player);
         processPlayerExit(warrior);
-    }
-
-    protected @Nullable Warrior getLastAttacker(@NotNull Warrior victim) {
-        Player player = victim.toOnlinePlayer();
-        EntityDamageEvent event = player != null ? player.getLastDamageCause() : null;
-        if (event instanceof EntityDamageByEntityEvent entityDamageByEntityEvent) {
-            Entity attacker = entityDamageByEntityEvent.getDamager();
-            if (attacker instanceof Player playerAttacker) {
-                return plugin.getDatabaseManager().getWarrior(playerAttacker);
-            }
-            if (attacker instanceof Projectile projectile && projectile.getShooter() instanceof Player shooter) {
-                return plugin.getDatabaseManager().getWarrior(shooter);
-            }
-        }
-        return null;
-    }
-
-    protected void processInventoryOnExit(@NotNull Warrior warrior) {
-        Player player = warrior.toOnlinePlayer();
-        if (player == null) {
-            plugin.debug("processInventoryOnExit() -> null player");
-            return;
-        }
-        World world = player.getWorld();
-        if (shouldKeepInventoryOnDeath(warrior) || Boolean.parseBoolean(world.getGameRuleValue("keepInventory"))) {
-            return;
-        }
-        if (shouldClearDropsOnDeath(warrior)) {
-            return;
-        }
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
-            world.dropItemNaturally(player.getLocation(), item.clone());
-        }
-        Kit.clearInventory(player);
     }
 
     public void onRespawn(@NotNull Warrior warrior) {
