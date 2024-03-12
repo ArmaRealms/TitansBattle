@@ -2,6 +2,7 @@ package me.roinujnosde.titansbattle.commands.completions;
 
 import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.InvalidCommandArgument;
+import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class ArenasCompletion extends AbstractCompletion {
     public ArenasCompletion(TitansBattle plugin) {
@@ -30,13 +32,15 @@ public class ArenasCompletion extends AbstractCompletion {
             return inUse;
         }
 
-        final boolean group = Boolean.parseBoolean(context.getConfig("group"));
-        List<String> arenas = new ArrayList<>(getConfigurationDao().getConfigurations(ArenaConfiguration.class).stream()
-                .filter(a -> a.isGroupMode() == group)
-                .map(ArenaConfiguration::getName)
-                .toList());
-
+        List<String> arenas = getArenaList();
         arenas.removeAll(inUse);
         return arenas;
+    }
+
+    public List<String> getArenaList() {
+        return new ArrayList<>(getConfigurationDao().getConfigurations(ArenaConfiguration.class).stream()
+                .filter(Objects::nonNull)
+                .map(ArenaConfiguration::getName)
+                .toList());
     }
 }
