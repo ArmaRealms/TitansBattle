@@ -96,8 +96,10 @@ public abstract class BaseGame {
         }
         lobby = true;
         Integer interval = getConfig().getAnnouncementStartingInterval();
-        lobbyTask = new LobbyAnnouncementTask(getConfig().getAnnouncementStartingTimes(), interval);
-        addTask(lobbyTask.runTaskTimer(plugin, 0, interval * 20));
+        Integer startingTimes = getConfig().getAnnouncementStartingTimes();
+        lobbyTask = new LobbyAnnouncementTask(startingTimes, interval);
+        addTask(lobbyTask.runTaskTimer(plugin, 0, interval * 20L));
+        addTask(new LobbyWantingAnnouncementTask((startingTimes + 1L) * interval).runTaskTimerAsynchronously(plugin, 0, 20L));
     }
 
     public void finish(boolean cancelled) {
@@ -603,6 +605,16 @@ public abstract class BaseGame {
         }
     }
 
+    private ChatColor getColor(long timer) {
+        ChatColor color = GREEN;
+        if (timer <= 3) {
+            color = RED;
+        } else if (timer <= 7) {
+            color = YELLOW;
+        }
+        return color;
+    }
+
     public class LobbyAnnouncementTask extends BukkitRunnable {
         private int times;
         private final long interval;
@@ -634,6 +646,27 @@ public abstract class BaseGame {
             }
             this.cancel();
             lobbyTask = null;
+        }
+    }
+
+    public class LobbyWantingAnnouncementTask extends BukkitRunnable {
+        private long seconds;
+
+        public LobbyWantingAnnouncementTask(long seconds) {
+            this.seconds = seconds;
+        }
+
+        @Override
+        public void run() {
+            if (seconds > 0) {
+                seconds--;
+                participants.stream()
+                        .map(Warrior::toOnlinePlayer)
+                        .filter(Objects::nonNull)
+                        .forEach(p -> p.sendTitle(getColor(seconds) + "" + seconds, ""));
+            } else {
+                this.cancel();
+            }
         }
     }
 
@@ -700,7 +733,7 @@ public abstract class BaseGame {
             List<Player> players = warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull).toList();
             String title;
             if (timer > 0) {
-                title = getColor() + "" + timer;
+                title = getColor(timer) + "" + timer;
             } else {
                 title = RED + getLang("title.fight");
                 this.cancel();
@@ -708,16 +741,6 @@ public abstract class BaseGame {
             }
             players.forEach(player -> player.sendTitle(title, ""));
             timer--;
-        }
-
-        private ChatColor getColor() {
-            ChatColor color = GREEN;
-            if (timer <= 3) {
-                color = RED;
-            } else if (timer <= 7) {
-                color = YELLOW;
-            }
-            return color;
         }
     }
 
