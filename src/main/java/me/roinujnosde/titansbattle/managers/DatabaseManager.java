@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author RoinujNosde
@@ -69,7 +70,7 @@ public class DatabaseManager {
     private Connection connection;
 
     private final Map<String, GroupData> groups = new HashMap<>();
-    private final Set<Warrior> warriors = new HashSet<>();
+    private final Map<UUID, Warrior> warriors = new HashMap<>();
     private final List<Winners> winners = new ArrayList<>();
 
     private enum CountType {
@@ -83,25 +84,25 @@ public class DatabaseManager {
     public void setup() {
         try (Statement statement = getConnection().createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS tb_warriors "
-                              + "(displayname varchar(30) NOT NULL,"
-                              + " uuid varchar(255) NOT NULL,"
-                              + " kills int NOT NULL,"
-                              + " deaths int NOT NULL,"
-                              + " victories int NOT NULL,"
-                              + " game varchar(20) NOT NULL);");
+                    + "(displayname varchar(30) NOT NULL,"
+                    + " uuid varchar(255) NOT NULL,"
+                    + " kills int NOT NULL,"
+                    + " deaths int NOT NULL,"
+                    + " victories int NOT NULL,"
+                    + " game varchar(20) NOT NULL);");
             statement.execute("CREATE TABLE IF NOT EXISTS tb_groups"
-                              + "(identification varchar(255) NOT NULL,"
-                              + " kills int NOT NULL,"
-                              + " deaths int NOT NULL,"
-                              + " victories int NOT NULL,"
-                              + " defeats int NOT NULL,"
-                              + " game varchar(20) NOT NULL);");
+                    + "(identification varchar(255) NOT NULL,"
+                    + " kills int NOT NULL,"
+                    + " deaths int NOT NULL,"
+                    + " victories int NOT NULL,"
+                    + " defeats int NOT NULL,"
+                    + " game varchar(20) NOT NULL);");
             statement.execute("CREATE TABLE IF NOT EXISTS tb_winners"
-                              + "(date varchar(10) NOT NULL,"
-                              + " killer varchar(255),"
-                              + " player_winners text,"
-                              + " winner_group varchar(255),"
-                              + " game varchar(20) NOT NULL);");
+                    + "(date varchar(10) NOT NULL,"
+                    + " killer varchar(255),"
+                    + " player_winners text,"
+                    + " winner_group varchar(255),"
+                    + " game varchar(20) NOT NULL);");
         } catch (SQLException ex) {
             plugin.debug("Error while creating the tables: " + ex.getMessage(), false);
         }
@@ -116,7 +117,7 @@ public class DatabaseManager {
             String username = cm.getSqlUsername();
             String password = cm.getSqlPassword();
             connection = DriverManager.getConnection("jdbc:mysql://" + hostname + ":" + port + "/" + database +
-                                                     "?useSSL=false", username, password);
+                    "?useSSL=false", username, password);
         } else {
             File dbFile = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + database + ".db");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
@@ -205,7 +206,7 @@ public class DatabaseManager {
         HashSet<GameConfiguration> updated = new HashSet<>();
 
         String update = "UPDATE tb_groups SET kills=?, deaths=?, victories=?,"
-                        + " defeats=? WHERE identification=? AND game=?;";
+                + " defeats=? WHERE identification=? AND game=?;";
         try (PreparedStatement statement = getConnection().prepareStatement(update)) {
             for (GameConfiguration game : getGames()) {
                 String gameName = game.getName();
@@ -316,17 +317,15 @@ public class DatabaseManager {
     @NotNull
     public Warrior getWarrior(@NotNull OfflinePlayer offlinePlayer) {
         UUID uuid = offlinePlayer.getUniqueId();
-        for (Warrior warrior : warriors) {
-            if (warrior.toPlayer().getUniqueId().equals(uuid)) {
-                if (offlinePlayer instanceof Player player) {
-                    warrior.setOnlinePlayer(player);
-                }
-                return warrior;
+        Warrior warrior = warriors.get(uuid);
+        if (warrior != null) {
+            if (offlinePlayer instanceof Player player) {
+                warrior.setOnlinePlayer(player);
             }
+        } else {
+            warrior = new Warrior(offlinePlayer, plugin::getGroupManager);
+            warriors.put(uuid, warrior);
         }
-
-        Warrior warrior = new Warrior(offlinePlayer, plugin::getGroupManager);
-        warriors.add(warrior);
         return warrior;
     }
 
@@ -390,7 +389,7 @@ public class DatabaseManager {
 
                 Warrior warrior = new Warrior(player, plugin::getGroupManager, playerData.get(CountType.KILLS),
                         playerData.get(CountType.DEATHS), playerData.get(CountType.VICTORIES));
-                warriors.add(warrior);
+                warriors.put(warrior.getUniqueId(), warrior);
             }
 
 
@@ -562,7 +561,7 @@ public class DatabaseManager {
     }
 
     public Set<Warrior> getWarriors() {
-        return Collections.unmodifiableSet(warriors);
+        return new HashSet<>(warriors.values());
     }
 
     public Map<String, GroupData> getGroups() {
