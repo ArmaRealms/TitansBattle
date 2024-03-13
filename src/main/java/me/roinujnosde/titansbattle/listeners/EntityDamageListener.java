@@ -17,9 +17,13 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class EntityDamageListener extends TBListener {
+    private final DatabaseManager dm;
+    private final GroupManager gm;
 
     public EntityDamageListener(@NotNull TitansBattle plugin) {
         super(plugin);
+        this.dm = plugin.getDatabaseManager();
+        this.gm = plugin.getGroupManager();
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -34,11 +38,10 @@ public class EntityDamageListener extends TBListener {
     //mcMMO's listener is on HIGHEST and ignoreCancelled = true, this will run before
     @EventHandler(priority = EventPriority.HIGH)
     public void onDamage(EntityDamageEvent event) {
-        DatabaseManager dm = plugin.getDatabaseManager();
-
         if (!(event.getEntity() instanceof Player defender)) {
             return;
         }
+
         BaseGame game = plugin.getBaseGameFrom(defender);
         if (game == null) {
             return;
@@ -48,6 +51,7 @@ public class EntityDamageListener extends TBListener {
             event.setCancelled(true);
             return;
         }
+
         event.setCancelled(false);
         if (event instanceof EntityDamageByEntityEvent) {
             processEntityDamageByEntityEvent(event, defender, game);
@@ -55,14 +59,13 @@ public class EntityDamageListener extends TBListener {
     }
 
     private void processEntityDamageByEntityEvent(EntityDamageEvent event, Player defender, BaseGame game) {
-        DatabaseManager dm = plugin.getDatabaseManager();
-
         EntityDamageByEntityEvent subEvent = (EntityDamageByEntityEvent) event;
         Player attacker = Helper.getPlayerAttackerOrKiller(subEvent.getDamager());
         if (!isDamageTypeAllowed(subEvent, game)) {
             event.setCancelled(true);
             return;
         }
+
         if (attacker != null) {
             Warrior warrior = dm.getWarrior(attacker);
             if (!game.getConfig().isPvP() || !game.isInBattle(warrior)) {
@@ -70,13 +73,13 @@ public class EntityDamageListener extends TBListener {
                 return;
             }
         }
+
         if (attacker == null || !game.getConfig().isGroupMode()) {
             return;
         }
 
-        GroupManager groupManager = TitansBattle.getInstance().getGroupManager();
-        if (groupManager != null) {
-            event.setCancelled(groupManager.sameGroup(defender.getUniqueId(), attacker.getUniqueId()));
+        if (gm != null) {
+            event.setCancelled(gm.sameGroup(defender.getUniqueId(), attacker.getUniqueId()));
         }
     }
 
