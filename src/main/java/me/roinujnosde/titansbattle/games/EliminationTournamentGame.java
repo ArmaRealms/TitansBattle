@@ -154,9 +154,10 @@ public class EliminationTournamentGame extends Game {
         }
     }
 
-    private void heal(List<Warrior> warriors) {
+    private void heal(@NotNull List<Warrior> warriors) {
         warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull).forEach(player -> {
-            player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
+            var maxHealth = Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getDefaultValue();
+            player.setHealth(maxHealth);
             player.setFoodLevel(20);
             player.setFireTicks(0);
         });
@@ -277,7 +278,9 @@ public class EliminationTournamentGame extends Game {
 
     private void kickExcessive(@NotNull Set<Warrior> warriors) {
         participants.removeIf(warriors::contains);
-        Set<Player> players = warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull)
+        Set<Player> players = warriors.stream()
+                .map(Warrior::toOnlinePlayer)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         teleport(warriors, getConfig().getWatchroom());
         players.forEach(player -> {
@@ -300,7 +303,7 @@ public class EliminationTournamentGame extends Game {
 
     @NotNull
     private List<Group> getWaitingThirdPlaceGroups() {
-        return waitingThirdPlace.stream().map(this::getGroup).distinct().toList();
+        return new ArrayList<>(waitingThirdPlace.stream().map(this::getGroup).distinct().toList());
     }
 
     private void generateDuelists() {
@@ -322,16 +325,16 @@ public class EliminationTournamentGame extends Game {
         if (!getConfig().isGroupMode()) {
             generateDuelist(participants, playerDuelists);
         } else {
-            ArrayList<Group> groups = new ArrayList<>(getGroupParticipants().keySet());
+            List<Group> groups = new ArrayList<>(getGroupParticipants().keySet());
             generateDuelist(groups, groupDuelists);
         }
     }
 
-    private <T> void generateDuelist(List<T> list, List<Duel<T>> duelList) {
-        if (duelList.size() >= 1) {
+    private <T> void generateDuelist(List<T> list, @NotNull List<Duel<T>> duelList) {
+        if (!duelList.isEmpty()) {
             duelList.remove(0);
         }
-        if (duelList.size() < 1) {
+        if (duelList.isEmpty()) {
             Collections.shuffle(list);
             duelList.clear();
             for (int i = 0; i + 1 < list.size(); i = i + 2) {
@@ -431,7 +434,7 @@ public class EliminationTournamentGame extends Game {
         }
         if (getConfig().isGroupMode() && firstGroup != null) {
             casualties.stream().filter(firstGroup::isMember).forEach(firstPlaceWinners::add);
-            firstPlaceWinners = firstPlaceWinners.stream().distinct().toList();
+            firstPlaceWinners = new ArrayList<>(firstPlaceWinners.stream().distinct().toList());
             todayWinners.setWinnerGroup(getConfig().getName(), firstGroup.getName());
             GroupWinEvent event = new GroupWinEvent(firstGroup);
             Bukkit.getPluginManager().callEvent(event);
@@ -490,7 +493,7 @@ public class EliminationTournamentGame extends Game {
         return MessageFormat.format(gameInfo, firstDuel[0], firstDuel[1], builder.toString());
     }
 
-    private <D> void populateDuelsMessage(StringBuilder builder, List<Duel<D>> list, Function<D, String> getName) {
+    private <D> void populateDuelsMessage(StringBuilder builder, @NotNull List<Duel<D>> list, Function<D, String> getName) {
         String nextDuelsLineMessage = getLang("game_info_duels_line");
         if (list.size() > 1) {
             for (int i = 1; i < list.size(); i++) {
@@ -505,7 +508,7 @@ public class EliminationTournamentGame extends Game {
         return duels.size() > 1;
     }
 
-    private <D> String[] duelistsToNameArray(int index, List<Duel<D>> list, Function<D, String> getName) {
+    private <D> String @NotNull [] duelistsToNameArray(int index, @NotNull List<Duel<D>> list, Function<D, String> getName) {
         return list.get(index).getDuelists().stream().map(getName).toArray(String[]::new);
     }
 }
