@@ -13,7 +13,7 @@ public class PlayerMoveListener extends TBListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onCommandTeleport(PlayerMoveEvent event) {
+    public void onPlayerMove(PlayerMoveEvent event) {
         if (event.hasChangedBlock()) {
             BaseGame game = plugin.getBaseGameFrom(event.getPlayer());
             if (game != null && game.isPreparation()) {
