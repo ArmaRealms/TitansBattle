@@ -7,6 +7,7 @@ import me.roinujnosde.titansbattle.listeners.JoinGameListener;
 import me.roinujnosde.titansbattle.listeners.PlayerCommandPreprocessListener;
 import me.roinujnosde.titansbattle.listeners.PlayerDeathListener;
 import me.roinujnosde.titansbattle.listeners.PlayerJoinListener;
+import me.roinujnosde.titansbattle.listeners.PlayerMoveListener;
 import me.roinujnosde.titansbattle.listeners.PlayerQuitListener;
 import me.roinujnosde.titansbattle.listeners.PlayerRespawnListener;
 import me.roinujnosde.titansbattle.listeners.PlayerTeleportListener;
@@ -38,6 +39,7 @@ public class ListenerManager {
         registerListener(new EntityDamageListener(plugin));
         registerListener(new PlayerTeleportListener(plugin));
         registerListener(new JoinGameListener(plugin));
+        registerListener(new PlayerMoveListener(plugin));
         plugin.getLogger().info("Registering battle listeners...");
     }
 
