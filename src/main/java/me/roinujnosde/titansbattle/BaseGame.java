@@ -62,6 +62,7 @@ public abstract class BaseGame {
 
     protected BaseGameConfiguration config;
     protected boolean lobby;
+    protected boolean preparation;
     protected boolean battle;
     protected final List<Warrior> participants = new ArrayList<>();
     protected final Map<Warrior, Group> groups = new HashMap<>();
@@ -596,6 +597,7 @@ public abstract class BaseGame {
     }
 
     protected void startPreparation() {
+        preparation = true;
         addTask(new PreparationTimeTask().runTaskLater(plugin, getConfig().getPreparationTime() * 20L));
         addTask(new CountdownTitleTask(getCurrentFighters(), getConfig().getPreparationTime()).runTaskTimer(plugin, 0L, 20L));
         if (getConfig().isWorldBorder()) {
@@ -603,6 +605,10 @@ public abstract class BaseGame {
             WorldBorder worldBorder = getConfig().getBorderCenter().getWorld().getWorldBorder();
             addTask(new BorderTask(worldBorder).runTaskTimer(plugin, borderInterval, borderInterval));
         }
+    }
+
+    public boolean isPreparation() {
+        return preparation;
     }
 
     private ChatColor getColor(long timer) {
@@ -711,6 +717,7 @@ public abstract class BaseGame {
             broadcastKey("preparation_over");
             runCommandsBeforeBattle(getCurrentFighters());
             battle = true;
+            preparation = false;
         }
     }
 
