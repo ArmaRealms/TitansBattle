@@ -41,16 +41,17 @@ import org.jetbrains.annotations.NotNull;
  * @author RoinujNosde
  */
 public class PlayerDeathListener extends TBListener {
+    private final GameManager gm;
+    private final DatabaseManager dm;
 
     public PlayerDeathListener(@NotNull TitansBattle plugin) {
         super(plugin);
+        this.gm = plugin.getGameManager();
+        this.dm = plugin.getDatabaseManager();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onDeath(PlayerDeathEvent event) {
-        GameManager gm = plugin.getGameManager();
-        DatabaseManager databaseManager = plugin.getDatabaseManager();
-
         Player victim = event.getEntity();
         Player killer = Helper.getPlayerAttackerOrKiller(victim.getKiller());
 
@@ -62,14 +63,14 @@ public class PlayerDeathListener extends TBListener {
                     return;
                 }
                 gm.setKiller(gameConfig, killer, victim);
-                databaseManager.saveAll();
+                dm.saveAll();
             }
             return;
         }
         if (game.getConfig().isKeepExp()) {
             event.setKeepLevel(true);
         }
-        Warrior warrior = databaseManager.getWarrior(victim);
+        Warrior warrior = dm.getWarrior(victim);
         if (game.shouldKeepInventoryOnDeath(warrior)) {
             event.setKeepInventory(true);
         }
@@ -77,6 +78,6 @@ public class PlayerDeathListener extends TBListener {
             event.getDrops().clear();
             event.setDroppedExp(0);
         }
-        game.onDeath(warrior, killer != null ? databaseManager.getWarrior(killer) : null);
+        game.onDeath(warrior, killer != null ? dm.getWarrior(killer) : null);
     }
 }
