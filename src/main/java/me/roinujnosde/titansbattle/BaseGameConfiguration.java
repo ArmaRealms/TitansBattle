@@ -7,8 +7,10 @@ import me.roinujnosde.titansbattle.types.Prizes;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.File;
 import java.util.Collections;
@@ -115,7 +117,7 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     }
 
     @Override
-    public Map<String, Object> serialize() {
+    public @NotNull Map<String, Object> serialize() {
         return ConfigUtils.serialize(this);
     }
 
@@ -288,7 +290,7 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
         return prizes;
     }
 
-    private Map<String, Prizes> createPrizesMap() {
+    private @NotNull Map<String, Prizes> createPrizesMap() {
         LinkedHashMap<String, Prizes> map = new LinkedHashMap<>();
         for (Prize p : Prize.values()) {
             map.put(p.name(), new Prizes());
@@ -304,12 +306,13 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
         FIRST, SECOND, THIRD, KILLER;
 
         @SuppressWarnings("unused")
-        public static Prize deserialize(Map<String, Object> data) {
+        public static Prize deserialize(@NotNull Map<String, Object> data) {
             return Prize.valueOf((String) data.get("prize"));
         }
 
+        @Contract(" -> new")
         @Override
-        public Map<String, Object> serialize() {
+        public @NotNull @Unmodifiable Map<String, Object> serialize() {
             return Collections.singletonMap("prize", this.name());
         }
     }

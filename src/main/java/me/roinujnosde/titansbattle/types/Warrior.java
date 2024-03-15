@@ -134,11 +134,11 @@ public class Warrior {
 
     @Nullable
     public Group getGroup() {
-        GroupManager groupManager = this.groupManager.get();
-        if (groupManager == null) {
+        GroupManager gm = this.groupManager.get();
+        if (gm == null) {
             return null;
         }
-        return groupManager.getGroup(offlinePlayer.getUniqueId());
+        return gm.getGroup(offlinePlayer.getUniqueId());
     }
 
     public int getTotalKills() {
@@ -203,7 +203,7 @@ public class Warrior {
         isModified = true;
     }
 
-    private <T> int getSum(Map<T, Integer> map) {
+    private <T> int getSum(@NotNull Map<T, Integer> map) {
         return map.values().stream().mapToInt(i -> i).sum();
     }
 
