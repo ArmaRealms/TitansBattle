@@ -269,7 +269,9 @@ public final class TitansBattle extends JavaPlugin {
                 try {
                     webhook.execute();
                 } catch (IOException e) {
-                    getLogger().log(Level.SEVERE, "Error sending webhook message", e);
+                    if (configManager.isDebug()) {
+                        getLogger().log(Level.SEVERE, "Error sending webhook message", e);
+                    }
                 }
             }
         });
