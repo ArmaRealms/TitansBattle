@@ -432,6 +432,8 @@ public class EliminationTournamentGame extends Game {
         if (getConfig().isUseKits()) {
             firstPlaceWinners.forEach(Kit::clearInventory);
         }
+
+        firstPlaceWinners = new ArrayList<>(firstPlaceWinners);
         if (getConfig().isGroupMode() && firstGroup != null) {
             casualties.stream().filter(firstGroup::isMember).forEach(firstPlaceWinners::add);
             firstPlaceWinners = new ArrayList<>(firstPlaceWinners.stream().distinct().toList());
@@ -452,7 +454,7 @@ public class EliminationTournamentGame extends Game {
 
         Warrior killer = findKiller();
         if (killer != null) {
-            givePrizes(KILLER, null, List.of(killer));
+            givePrizes(KILLER, null, Collections.singletonList(killer));
             gameManager.setKiller(getConfig(), killer, null);
             SoundUtils.playSound(SoundUtils.Type.VICTORY, plugin.getConfig(), killer.toOnlinePlayer());
             discordAnnounce("discord_who_won_killer", killer.getName(), killsCount.get(killer));

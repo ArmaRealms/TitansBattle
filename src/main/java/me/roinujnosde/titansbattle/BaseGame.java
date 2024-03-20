@@ -373,13 +373,11 @@ public abstract class BaseGame {
     protected void givePrizes(Prize prize, @Nullable Group group, @Nullable List<Warrior> warriors) {
         List<Player> leaders = new ArrayList<>();
         List<Player> members;
-        if (warriors == null) {
-            return;
-        }
-        List<Player> players = warriors.stream()
+        if (warriors == null) return;
+        List<Player> players = new ArrayList<>(warriors.stream()
                 .map(Warrior::toOnlinePlayer)
                 .filter(Objects::nonNull)
-                .toList();
+                .toList());
 
         if (group != null) {
             members = new ArrayList<>();
