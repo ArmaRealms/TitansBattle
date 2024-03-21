@@ -319,14 +319,11 @@ public class DatabaseManager {
         UUID uuid = offlinePlayer.getUniqueId();
         Warrior warrior = warriors.get(uuid);
         if (warrior != null) {
-            if (offlinePlayer instanceof Player player && warrior.toOnlinePlayer() == null) {
+            if (offlinePlayer instanceof Player player) {
                 warrior.setOnlinePlayer(player);
             }
         } else {
             warrior = new Warrior(offlinePlayer, plugin::getGroupManager);
-            if (offlinePlayer instanceof Player player) {
-                warrior.setOnlinePlayer(player);
-            }
             warriors.put(uuid, warrior);
         }
         return warrior;
