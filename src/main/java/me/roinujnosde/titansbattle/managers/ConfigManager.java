@@ -41,7 +41,6 @@ import java.util.logging.Level;
 import static java.lang.String.format;
 
 /**
- *
  * @author RoinujNosde
  */
 public final class ConfigManager {
@@ -66,20 +65,22 @@ public final class ConfigManager {
         if (isScheduler()) {
             events.clear();
             ConfigurationSection schedulersSection = config.getConfigurationSection("scheduler.events");
-            if (schedulersSection != null) {
-                Set<String> ids = schedulersSection.getKeys(false);
-                String pathPrefix = "scheduler.events.";
-                for (String id : ids) {
-                    try {
-                        String game = config.getString(pathPrefix + id + ".game");
-                        Frequency frequency = Frequency.valueOf(config.getString(pathPrefix + id + ".frequency"));
-                        int day = config.getInt(pathPrefix + id + ".day");
-                        int hour = config.getInt(pathPrefix + id + ".hour");
-                        int minute = config.getInt(pathPrefix + id + ".minute");
-                        events.add(new Event(game, frequency, day, hour, minute));
-                    } catch (IllegalArgumentException ex) {
-                        plugin.getLogger().log(Level.SEVERE, format("Invalid event configuration for ID %s: %s", id, ex.getMessage()));
-                    }
+            if (schedulersSection == null) {
+                return;
+            }
+            Set<String> ids = schedulersSection.getKeys(false);
+            String pathPrefix = "scheduler.events.";
+            for (String id : ids) {
+                try {
+                    String game = config.getString(pathPrefix + id + ".game");
+                    Frequency frequency = Frequency.valueOf(config.getString(pathPrefix + id + ".frequency"));
+                    int day = config.getInt(pathPrefix + id + ".day");
+                    int hour = config.getInt(pathPrefix + id + ".hour");
+                    int minute = config.getInt(pathPrefix + id + ".minute");
+                    if (game == null) continue;
+                    events.add(new Event(game, frequency, day, hour, minute));
+                } catch (IllegalArgumentException ex) {
+                    plugin.getLogger().log(Level.SEVERE, format("Invalid event configuration for ID %s: %s", id, ex.getMessage()));
                 }
             }
         }

@@ -32,6 +32,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -83,13 +85,14 @@ public class TaskManager {
         giveItemsTask = new GiveItemsTask().runTaskTimer(plugin, interval, interval);
     }
 
-    private TimerTask createTimerTask(Event event) {
+    @Contract(value = "_ -> new", pure = true)
+    private @NotNull TimerTask createTimerTask(Event event) {
         return new TimerTask() {
             @Override
             public void run() {
                 Optional<GameConfiguration> config = plugin.getConfigurationDao()
                         .getConfiguration(event.getGameName(), GameConfiguration.class);
-                if (!config.isPresent()) {
+                if (config.isEmpty()) {
                     plugin.getLogger().warning(String.format("Game %s not found!", event.getGameName()));
                     return;
                 }
@@ -97,7 +100,10 @@ public class TaskManager {
                     plugin.getLogger().info("There is a game running. Skipping event.");
                     return;
                 }
-                Bukkit.getScheduler().runTask(plugin, () -> plugin.getGameManager().start(config.get()));
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    plugin.getGameManager().getCurrentGame().ifPresent(game -> game.cancel(Bukkit.getConsoleSender()));
+                    plugin.getGameManager().start(config.get());
+                });
             }
         };
     }
