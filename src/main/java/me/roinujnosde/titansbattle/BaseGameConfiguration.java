@@ -44,6 +44,10 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     private Map<String, Prizes> prizesMap = createPrizesMap();
 
     protected Boolean pvp = true;
+    @Path("boxing")
+    protected Boolean boxing = false;
+    @Path("hit.amount")
+    protected Integer hitAmount = 100;
     @Path("damage-type.melee")
     protected Boolean meleeDamage = true;
     @Path("damage-type.ranged")
@@ -175,6 +179,14 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
 
     public Boolean isPvP() {
         return pvp;
+    }
+
+    public boolean isBoxing() {
+        return boxing;
+    }
+
+    public Integer getHitAmount() {
+        return hitAmount;
     }
 
     public Boolean isMeleeDamage() {

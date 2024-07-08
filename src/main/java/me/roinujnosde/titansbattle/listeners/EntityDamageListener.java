@@ -3,6 +3,7 @@ package me.roinujnosde.titansbattle.listeners;
 import me.roinujnosde.titansbattle.BaseGame;
 import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
+import me.roinujnosde.titansbattle.games.EliminationTournamentGame;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.managers.GroupManager;
 import me.roinujnosde.titansbattle.types.Warrior;
@@ -74,11 +75,14 @@ public class EntityDamageListener extends TBListener {
             }
         }
 
-        if (attacker == null || !game.getConfig().isGroupMode()) {
-            return;
+        if (attacker == null) return;
+
+        if (!event.isCancelled() && game instanceof EliminationTournamentGame elimination && elimination.getConfig().isBoxing()) {
+            event.setDamage(0.0);
+            elimination.hit(attacker, defender);
         }
 
-        if (gm != null) {
+        if (game.getConfig().isGroupMode() && gm != null) {
             event.setCancelled(gm.sameGroup(defender.getUniqueId(), attacker.getUniqueId()));
         }
     }

@@ -10,6 +10,7 @@ import me.roinujnosde.titansbattle.types.Kit;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.types.Winners;
 import me.roinujnosde.titansbattle.utils.Helper;
+import me.roinujnosde.titansbattle.utils.MessageUtils;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
@@ -21,10 +22,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,6 +51,8 @@ public class EliminationTournamentGame extends Game {
     private boolean nextToLoseIsThirdWinner = false;
     private boolean battleForThirdPlace = false;
 
+    private final Map<UUID, Integer> hitsCount = new HashMap<>();
+
     public EliminationTournamentGame(TitansBattle plugin, GameConfiguration config) {
         super(plugin, config);
     }
@@ -61,9 +67,9 @@ public class EliminationTournamentGame extends Game {
 
     private boolean isCurrentDuelist(@NotNull Warrior warrior) {
         if (!getConfig().isGroupMode()) {
-            return playerDuelists.size() != 0 && playerDuelists.get(0).isDuelist(warrior);
+            return !playerDuelists.isEmpty() && playerDuelists.get(0).isDuelist(warrior);
         }
-        return groupDuelists.size() != 0 && groupDuelists.get(0).isDuelist(getGroup(warrior));
+        return !groupDuelists.isEmpty() && groupDuelists.get(0).isDuelist(getGroup(warrior));
     }
 
     private List<Warrior> getDuelLosers(@NotNull Warrior defeated) {
@@ -515,6 +521,18 @@ public class EliminationTournamentGame extends Game {
 
     private boolean isMember(Group group, Warrior warrior) {
         return group.equals(getGroup(warrior));
+    }
+
+    public void hit(Player attacker, Player victim) {
+        UUID attackerUUID = attacker.getUniqueId();
+        hitsCount.put(attackerUUID, hitsCount.getOrDefault(attackerUUID, 0) + 1);
+        if (hitsCount.get(attackerUUID) >= getConfig().getHitAmount()) {
+            hitsCount.remove(attackerUUID);
+            hitsCount.remove(victim.getUniqueId());
+            victim.damage(1000.0);
+        }
+
+        MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID)));
     }
 
 }

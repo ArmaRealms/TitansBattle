@@ -471,10 +471,11 @@ public abstract class BaseGame {
             players.forEach(p -> SoundUtils.playSound(ENEMY_DEATH, plugin.getConfig(), p));
             return;
         }
-        GroupManager groupManager = plugin.getGroupManager();
+
         if (groupManager == null) {
             return;
         }
+
         Group victimGroup = groupManager.getGroup(victim.getUniqueId());
         players.forEach(participant -> {
             Group group = groupManager.getGroup(participant.getUniqueId());
