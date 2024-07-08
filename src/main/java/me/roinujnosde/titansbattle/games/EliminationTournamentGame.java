@@ -532,7 +532,7 @@ public class EliminationTournamentGame extends Game {
             victim.damage(1000.0);
         }
 
-        MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID)));
+        MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
     }
 
 }
