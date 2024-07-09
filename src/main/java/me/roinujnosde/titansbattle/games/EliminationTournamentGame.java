@@ -529,10 +529,14 @@ public class EliminationTournamentGame extends Game {
         if (hitsCount.get(attackerUUID) >= getConfig().getHitAmount()) {
             hitsCount.remove(attackerUUID);
             hitsCount.remove(victim.getUniqueId());
-            victim.damage(1000.0);
+            Warrior warrior = databaseManager.getWarrior(victim);
+            if (shouldClearDropsOnDeath(warrior)) {
+                victim.getInventory().clear();
+            }
+            onDeath(warrior, databaseManager.getWarrior(attacker));
+        } else {
+            MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
         }
-
-        MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
     }
 
 }
