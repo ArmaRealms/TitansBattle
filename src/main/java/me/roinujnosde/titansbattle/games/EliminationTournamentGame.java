@@ -527,7 +527,9 @@ public class EliminationTournamentGame extends Game {
     public void hit(Player attacker, Player victim) {
         UUID attackerUUID = attacker.getUniqueId();
         hitsCount.put(attackerUUID, hitsCount.getOrDefault(attackerUUID, 0) + 1);
-        if (hitsCount.get(attackerUUID) >= getConfig().getHitAmount()) {
+        if (hitsCount.get(attackerUUID) < getConfig().getHitAmount()) {
+            MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
+        } else {
             hitsCount.remove(attackerUUID);
             hitsCount.remove(victim.getUniqueId());
             Warrior warrior = databaseManager.getWarrior(victim);
@@ -543,8 +545,6 @@ public class EliminationTournamentGame extends Game {
             } else {
                 onDeath(warrior, databaseManager.getWarrior(attacker));
             }
-        } else {
-            MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
         }
     }
 
