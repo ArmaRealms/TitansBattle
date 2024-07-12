@@ -300,7 +300,7 @@ public abstract class BaseGame {
 
     public abstract @NotNull Collection<Warrior> getCurrentFighters();
 
-    public HashMap<Warrior, Integer> getKillsCount() {
+    public Map<Warrior, Integer> getKillsCount() {
         return killsCount;
     }
 

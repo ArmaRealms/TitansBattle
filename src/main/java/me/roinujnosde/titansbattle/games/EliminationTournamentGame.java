@@ -210,6 +210,7 @@ public class EliminationTournamentGame extends Game {
             if (player == null) return;
             setKit(warrior);
             teleport(warrior, getConfig().getLobby());
+            player.sendMessage(getLang("wait_for_third_place_fight"));
         } else {
             super.onRespawn(warrior);
         }
@@ -533,7 +534,15 @@ public class EliminationTournamentGame extends Game {
             if (shouldClearDropsOnDeath(warrior)) {
                 victim.getInventory().clear();
             }
-            onDeath(warrior, databaseManager.getWarrior(attacker));
+            if (waitingThirdPlace.contains(warrior)) {
+                Player player = warrior.toOnlinePlayer();
+                if (player == null) return;
+                setKit(warrior);
+                teleport(warrior, getConfig().getLobby());
+                player.sendMessage(getLang("wait_for_third_place_fight"));
+            } else {
+                onDeath(warrior, databaseManager.getWarrior(attacker));
+            }
         } else {
             MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
         }
