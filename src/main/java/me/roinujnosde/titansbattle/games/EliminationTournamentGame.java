@@ -528,7 +528,7 @@ public class EliminationTournamentGame extends Game {
         UUID attackerUUID = attacker.getUniqueId();
         hitsCount.put(attackerUUID, hitsCount.getOrDefault(attackerUUID, 0) + 1);
         if (hitsCount.get(attackerUUID) < getConfig().getHitAmount()) {
-            MessageUtils.sendActionBar(attacker, getLang("hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
+            MessageUtils.sendActionBar(attacker, getLang("boxing_hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
         } else {
             hitsCount.remove(attackerUUID);
             hitsCount.remove(victim.getUniqueId());

@@ -133,7 +133,7 @@ discord_who_won: "» Game over! Winner group is: {0}."
 discord_who_won_tournament: "» Game over! Winners are:\n  &b1# &f{0}\n  &b2# &f{1}\n  &b3# &f{2}."
 discord_who_won_killer: "» Game over! Killer is: {0} Kills: {1}."
 wait_for_third_place_fight: "&b» Wait, you'll be fighting for third place!"
-hit_amount: "&cHits: &e{0}&7/&c{1}"
+boxing_hit_count: "&cHits: &e{0}&7/&c{1}"
 players-ranking:
     victories-title: "V"
     kills-title: "K"
