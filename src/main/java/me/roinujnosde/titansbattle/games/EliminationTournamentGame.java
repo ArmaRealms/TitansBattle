@@ -13,7 +13,6 @@ import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.MessageUtils;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,8 +123,20 @@ public class EliminationTournamentGame extends Game {
 
     private void processLoss(@NotNull Warrior warrior, List<Warrior> duelLosers) {
         battle = false;
+
         List<Warrior> duelWinners = getDuelWinners(warrior);
-        heal(duelWinners);
+        for (Warrior dw : duelWinners) {
+            Player player = dw.toOnlinePlayer();
+            if (player == null) continue;
+            super.healPlayer(player);
+        }
+
+        for (Warrior dw : duelLosers) {
+            Player player = dw.toOnlinePlayer();
+            if (player == null) continue;
+            super.healPlayer(player);
+        }
+
         if (nextToLoseIsThirdWinner) {
             thirdPlaceWinners = duelLosers;
         }
@@ -157,15 +168,6 @@ public class EliminationTournamentGame extends Game {
         if (getConfig().isUseKits()) {
             thirdPlaceWinners.forEach(Kit::clearInventory);
         }
-    }
-
-    private void heal(@NotNull List<Warrior> warriors) {
-        warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull).forEach(player -> {
-            var maxHealth = Objects.requireNonNull(player.getAttribute(Attribute.GENERIC_MAX_HEALTH)).getDefaultValue();
-            player.setHealth(maxHealth);
-            player.setFoodLevel(20);
-            player.setFireTicks(0);
-        });
     }
 
     private void processLeavingDuringSemiFinals(@NotNull Warrior warrior) {

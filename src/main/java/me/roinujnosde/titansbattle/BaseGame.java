@@ -22,6 +22,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.WorldBorder;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -142,6 +144,8 @@ public abstract class BaseGame {
             player.sendMessage(getLang("teleport.error"));
             return;
         }
+
+        healPlayer(player);
         SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
         participants.add(warrior);
         groups.put(warrior, warrior.getGroup());
@@ -171,6 +175,7 @@ public abstract class BaseGame {
             return;
         }
 
+        healPlayer(player);
         SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
         participants.add(warrior);
         groups.put(warrior, warrior.getGroup());
@@ -399,7 +404,7 @@ public abstract class BaseGame {
         GameStartEvent event = new GameStartEvent(this);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
-            broadcastKey("cancelled", "CONSOLE");
+            broadcastKey("cancelled", "Server");
             return false;
         }
         if (getParticipants().size() < getConfig().getMinimumPlayers()) {
@@ -621,6 +626,15 @@ public abstract class BaseGame {
         return color;
     }
 
+    public void healPlayer(@NotNull Player player) {
+        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
+        player.setFoodLevel(20);
+        player.setFireTicks(0);
+        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        if (attribute == null) return;
+        player.setHealth(attribute.getDefaultValue());
+    }
+
     public class LobbyAnnouncementTask extends BukkitRunnable {
         private int times;
         private final long interval;
@@ -647,7 +661,7 @@ public abstract class BaseGame {
                 onLobbyEnd();
                 addTask(new GameExpirationTask().runTaskLater(plugin, getConfig().getExpirationTime() * 20L));
             } else {
-                broadcastKey("cancelled", "CONSOLE");
+                broadcastKey("cancelled", "Server");
                 finish(true);
             }
             this.cancel();
@@ -761,4 +775,5 @@ public abstract class BaseGame {
             });
         }
     }
+
 }
