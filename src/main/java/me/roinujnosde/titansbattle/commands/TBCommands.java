@@ -132,7 +132,7 @@ public class TBCommands extends BaseCommand {
     @Conditions("happening")
     @Description("{@@command.description.join}")
     public void join(@NotNull Player sender) {
-        plugin.debug(String.format("%s used /tb join", sender.getName()));
+        sender.getActivePotionEffects().forEach(effect -> sender.removePotionEffect(effect.getType()));
         gameManager.getCurrentGame().ifPresent(g -> g.onJoin(databaseManager.getWarrior(sender)));
     }
 
@@ -141,6 +141,7 @@ public class TBCommands extends BaseCommand {
     @Conditions("participant")
     @Description("{@@command.description.exit}")
     public void leave(Player sender) {
+        sender.getActivePotionEffects().forEach(effect -> sender.removePotionEffect(effect.getType()));
         Warrior warrior = databaseManager.getWarrior(sender);
         //noinspection ConstantConditions
         plugin.getBaseGameFrom(sender).onLeave(warrior);
