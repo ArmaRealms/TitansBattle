@@ -399,7 +399,7 @@ public abstract class BaseGame {
         GameStartEvent event = new GameStartEvent(this);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
-            broadcastKey("cancelled", "CONSOLE");
+            broadcastKey("cancelled", "Server");
             return false;
         }
         if (getParticipants().size() < getConfig().getMinimumPlayers()) {
@@ -646,7 +646,7 @@ public abstract class BaseGame {
                 onLobbyEnd();
                 addTask(new GameExpirationTask().runTaskLater(plugin, getConfig().getExpirationTime() * 20L));
             } else {
-                broadcastKey("cancelled", "CONSOLE");
+                broadcastKey("cancelled", "Server");
                 finish(true);
             }
             this.cancel();
