@@ -538,12 +538,10 @@ public class EliminationTournamentGame extends Game {
             if (shouldClearDropsOnDeath(warrior)) {
                 victim.getInventory().clear();
             }
-            if (waitingThirdPlace.contains(warrior)) {
-                Player player = warrior.toOnlinePlayer();
-                if (player == null) return;
+            if (isParticipant(warrior)) {
                 setKit(warrior);
                 teleport(warrior, getConfig().getLobby());
-                player.sendMessage(getLang("wait_for_third_place_fight"));
+                victim.sendMessage(getLang("wait_for_third_place_fight"));
             } else {
                 onDeath(warrior, databaseManager.getWarrior(attacker));
             }
