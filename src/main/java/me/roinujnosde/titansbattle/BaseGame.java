@@ -256,7 +256,7 @@ public abstract class BaseGame {
         }
         Player player = Objects.requireNonNull(warrior.toOnlinePlayer());
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            player.setHealth(0);
+            player.damage(Float.MAX_VALUE);
             return;
         }
         player.sendMessage(getLang("you-have-left"));
@@ -632,8 +632,7 @@ public abstract class BaseGame {
         player.setFoodLevel(20);
         player.setFireTicks(0);
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-        if (attribute == null) return;
-        player.setHealth(attribute.getDefaultValue());
+        if (attribute != null) player.setHealth(attribute.getDefaultValue());
     }
 
     public class LobbyAnnouncementTask extends BukkitRunnable {
