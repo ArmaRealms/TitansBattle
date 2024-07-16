@@ -156,10 +156,10 @@ public class EliminationTournamentGame extends Game {
     }
 
     private void healPlayer(@NotNull Player player) {
-        player.setFoodLevel(20);
-        player.setFireTicks(0);
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if (attribute != null) player.setHealth(attribute.getDefaultValue());
+        player.setFoodLevel(20);
+        player.setFireTicks(0);
     }
 
     private void processThirdPlaceBattle(List<Warrior> duelWinners) {
