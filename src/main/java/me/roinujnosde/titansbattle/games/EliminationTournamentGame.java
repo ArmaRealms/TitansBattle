@@ -519,17 +519,15 @@ public class EliminationTournamentGame extends Game {
         return group.equals(getGroup(warrior));
     }
 
-    public boolean hit(Player attacker, Player victim) {
+    public void hit(Player attacker, Player victim) {
         UUID attackerUUID = attacker.getUniqueId();
         hitsCount.put(attackerUUID, hitsCount.getOrDefault(attackerUUID, 0) + 1);
-        if (hitsCount.get(attackerUUID) < getConfig().getHitAmount()) {
+        if (hitsCount.get(attackerUUID) <= getConfig().getHitAmount()) {
             MessageUtils.sendActionBar(attacker, getLang("boxing_hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
-            return true;
         } else {
             hitsCount.remove(attackerUUID);
             hitsCount.remove(victim.getUniqueId());
-            victim.damage(Float.MAX_VALUE);
-            return false;
+            victim.setHealth(0.0);
         }
     }
 
