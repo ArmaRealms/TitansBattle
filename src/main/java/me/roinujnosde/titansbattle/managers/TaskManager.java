@@ -96,6 +96,10 @@ public class TaskManager {
                     plugin.getLogger().warning(String.format("Game %s not found!", event.getGameName()));
                     return;
                 }
+//                if (plugin.getGameManager().getCurrentGame().isPresent()) {
+//                    plugin.getLogger().info("There is a game running. Skipping event.");
+//                    return;
+//                }
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     plugin.getGameManager().getCurrentGame().ifPresent(game -> game.cancel(Bukkit.getConsoleSender()));
                     plugin.getGameManager().start(config.get());
