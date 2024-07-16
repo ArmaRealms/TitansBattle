@@ -443,6 +443,7 @@ public abstract class BaseGame {
             teleport(warrior, getConfig().getExit());
             PlayerExitGameEvent event = new PlayerExitGameEvent(player, this);
             Bukkit.getPluginManager().callEvent(event);
+            healPlayer(player);
         }
         participants.remove(warrior);
         Group group = getGroup(warrior);
