@@ -130,13 +130,6 @@ public class EliminationTournamentGame extends Game {
             if (player == null) continue;
             super.healPlayer(player);
         }
-
-        for (Warrior dw : duelLosers) {
-            Player player = dw.toOnlinePlayer();
-            if (player == null) continue;
-            super.healPlayer(player);
-        }
-
         if (nextToLoseIsThirdWinner) {
             thirdPlaceWinners = duelLosers;
         }
