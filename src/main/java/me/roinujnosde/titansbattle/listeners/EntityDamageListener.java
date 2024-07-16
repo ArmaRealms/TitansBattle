@@ -77,9 +77,10 @@ public class EntityDamageListener extends TBListener {
 
         if (attacker == null) return;
 
-        if (!event.isCancelled() && game instanceof EliminationTournamentGame elimination && elimination.getConfig().isBoxing()) {
+        if (game instanceof EliminationTournamentGame elimination && elimination.getConfig().isBoxing()) {
             event.setDamage(0.0);
             elimination.hit(attacker, defender);
+            return;
         }
 
         if (game.getConfig().isGroupMode() && gm != null) {

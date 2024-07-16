@@ -130,13 +130,6 @@ public class EliminationTournamentGame extends Game {
             if (player == null) continue;
             super.healPlayer(player);
         }
-
-        for (Warrior dw : duelLosers) {
-            Player player = dw.toOnlinePlayer();
-            if (player == null) continue;
-            super.healPlayer(player);
-        }
-
         if (nextToLoseIsThirdWinner) {
             thirdPlaceWinners = duelLosers;
         }
@@ -529,7 +522,7 @@ public class EliminationTournamentGame extends Game {
     public void hit(Player attacker, Player victim) {
         UUID attackerUUID = attacker.getUniqueId();
         hitsCount.put(attackerUUID, hitsCount.getOrDefault(attackerUUID, 0) + 1);
-        if (hitsCount.get(attackerUUID) < getConfig().getHitAmount()) {
+        if (hitsCount.get(attackerUUID) <= getConfig().getHitAmount()) {
             MessageUtils.sendActionBar(attacker, getLang("boxing_hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
         } else {
             hitsCount.remove(attackerUUID);
