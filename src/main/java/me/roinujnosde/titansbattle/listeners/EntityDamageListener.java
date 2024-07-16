@@ -77,13 +77,14 @@ public class EntityDamageListener extends TBListener {
 
         if (attacker == null) return;
 
-        if (!event.isCancelled() && game instanceof EliminationTournamentGame elimination && elimination.getConfig().isBoxing()) {
-            event.setDamage(0.0);
-            elimination.hit(attacker, defender);
+        if (game instanceof EliminationTournamentGame elimination && elimination.getConfig().isBoxing()) {
+            event.setCancelled(elimination.hit(attacker, defender));
+            return;
         }
 
-        if (game.getConfig().isGroupMode() && gm != null) {
-            event.setCancelled(gm.sameGroup(defender.getUniqueId(), attacker.getUniqueId()));
+        GroupManager groupManager = TitansBattle.getInstance().getGroupManager();
+        if (game.getConfig().isGroupMode() && groupManager != null) {
+            event.setCancelled(groupManager.sameGroup(defender.getUniqueId(), attacker.getUniqueId()));
         }
     }
 
