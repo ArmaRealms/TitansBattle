@@ -13,6 +13,8 @@ import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.MessageUtils;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -128,7 +130,7 @@ public class EliminationTournamentGame extends Game {
         for (Warrior dw : duelWinners) {
             Player player = dw.toOnlinePlayer();
             if (player == null) continue;
-            super.healPlayer(player);
+            healPlayer(player);
         }
         if (nextToLoseIsThirdWinner) {
             thirdPlaceWinners = duelLosers;
@@ -151,6 +153,13 @@ public class EliminationTournamentGame extends Game {
         }
         //delaying the next duel, so there is time for other players to respawn
         Bukkit.getScheduler().runTaskLater(plugin, this::startNextDuel, 20L);
+    }
+
+    private void healPlayer(@NotNull Player player) {
+        player.setFoodLevel(20);
+        player.setFireTicks(0);
+        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        if (attribute != null) player.setHealth(attribute.getDefaultValue());
     }
 
     private void processThirdPlaceBattle(List<Warrior> duelWinners) {

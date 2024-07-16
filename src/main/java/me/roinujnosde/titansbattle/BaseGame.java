@@ -22,8 +22,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.WorldBorder;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -145,7 +143,6 @@ public abstract class BaseGame {
             return;
         }
 
-        healPlayer(player);
         SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
         participants.add(warrior);
         groups.put(warrior, warrior.getGroup());
@@ -175,7 +172,6 @@ public abstract class BaseGame {
             return;
         }
 
-        healPlayer(player);
         SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
         participants.add(warrior);
         groups.put(warrior, warrior.getGroup());
@@ -443,7 +439,6 @@ public abstract class BaseGame {
             teleport(warrior, getConfig().getExit());
             PlayerExitGameEvent event = new PlayerExitGameEvent(player, this);
             Bukkit.getPluginManager().callEvent(event);
-            healPlayer(player);
         }
         participants.remove(warrior);
         Group group = getGroup(warrior);
@@ -625,14 +620,6 @@ public abstract class BaseGame {
             color = YELLOW;
         }
         return color;
-    }
-
-    public void healPlayer(@NotNull Player player) {
-        player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
-        player.setFoodLevel(20);
-        player.setFireTicks(0);
-        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-        if (attribute != null) player.setHealth(attribute.getDefaultValue());
     }
 
     public class LobbyAnnouncementTask extends BukkitRunnable {
