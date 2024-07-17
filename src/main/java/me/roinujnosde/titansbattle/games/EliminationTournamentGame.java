@@ -536,17 +536,7 @@ public class EliminationTournamentGame extends Game {
         } else {
             hitsCount.remove(attackerUUID);
             hitsCount.remove(victim.getUniqueId());
-            Warrior warrior = databaseManager.getWarrior(victim);
-            if (shouldClearDropsOnDeath(warrior)) {
-                victim.getInventory().clear();
-            }
-            if (isParticipant(warrior)) {
-                setKit(warrior);
-                teleport(warrior, getConfig().getLobby());
-                victim.sendMessage(getLang("wait_for_third_place_fight"));
-            } else {
-                onDeath(warrior, databaseManager.getWarrior(attacker));
-            }
+            victim.setHealth(0);
         }
     }
 
