@@ -130,7 +130,7 @@ public class EliminationTournamentGame extends Game {
         for (Warrior dw : duelWinners) {
             Player player = dw.toOnlinePlayer();
             if (player == null) continue;
-            healPlayer(player);
+            heal(player);
         }
         if (nextToLoseIsThirdWinner) {
             thirdPlaceWinners = duelLosers;
@@ -155,13 +155,6 @@ public class EliminationTournamentGame extends Game {
         Bukkit.getScheduler().runTaskLater(plugin, this::startNextDuel, 20L);
     }
 
-    private void healPlayer(@NotNull Player player) {
-        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-        if (attribute != null) player.setHealth(attribute.getDefaultValue());
-        player.setFoodLevel(20);
-        player.setFireTicks(0);
-    }
-
     private void processThirdPlaceBattle(List<Warrior> duelWinners) {
         battleForThirdPlace = false;
         thirdPlaceWinners = duelWinners;
@@ -170,6 +163,13 @@ public class EliminationTournamentGame extends Game {
         if (getConfig().isUseKits()) {
             thirdPlaceWinners.forEach(Kit::clearInventory);
         }
+    }
+
+    private void heal(@NotNull Player player) {
+        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        if (attribute != null) player.setHealth(attribute.getDefaultValue());
+        player.setFoodLevel(20);
+        player.setFireTicks(0);
     }
 
     private void processLeavingDuringSemiFinals(@NotNull Warrior warrior) {
