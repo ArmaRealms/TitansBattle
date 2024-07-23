@@ -4,8 +4,6 @@ import co.aikar.commands.BukkitCommandExecutionContext;
 import co.aikar.commands.InvalidCommandArgument;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.Challenge;
-import me.roinujnosde.titansbattle.challenges.ChallengeRequest;
-import me.roinujnosde.titansbattle.managers.ChallengeManager;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("rawtypes")
