@@ -66,6 +66,8 @@ public class ChallengeCommand extends BaseCommand {
         Set<Warrior> members = plugin.getGroupManager().getWarriors(challenger);
         members.remove(sender);
         members.forEach(w -> w.sendMessage(msgOwn));
+        Player player = sender.toOnlinePlayer();
+        if (player != null) player.getActivePotionEffects().forEach(e -> player.removePotionEffect(e.getType()));
         challenge.onChallengeJoin(sender);
     }
 
@@ -81,6 +83,8 @@ public class ChallengeCommand extends BaseCommand {
             requests.get(requests.size() - 1).getChallenge().onChallengeJoin(warrior);
             return;
         }
+        Player player = warrior.toOnlinePlayer();
+        if (player != null) player.getActivePotionEffects().forEach(e -> player.removePotionEffect(e.getType()));
         challenger.getChallenge().onChallengeJoin(warrior);
     }
 
@@ -91,6 +95,7 @@ public class ChallengeCommand extends BaseCommand {
     public void leave(Player sender) {
         Warrior warrior = databaseManager.getWarrior(sender);
         //noinspection ConstantConditions
+        sender.getActivePotionEffects().forEach(e -> sender.removePotionEffect(e.getType()));
         plugin.getBaseGameFrom(sender).onLeave(warrior);
     }
 

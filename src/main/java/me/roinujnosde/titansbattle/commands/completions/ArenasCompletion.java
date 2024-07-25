@@ -2,7 +2,6 @@ package me.roinujnosde.titansbattle.commands.completions;
 
 import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.InvalidCommandArgument;
-import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import org.jetbrains.annotations.NotNull;

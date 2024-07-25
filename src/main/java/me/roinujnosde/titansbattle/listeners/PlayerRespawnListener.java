@@ -3,9 +3,8 @@ package me.roinujnosde.titansbattle.listeners;
 import me.roinujnosde.titansbattle.BaseGame;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.managers.DatabaseManager;
-import me.roinujnosde.titansbattle.types.Warrior;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,15 +16,12 @@ public class PlayerRespawnListener extends TBListener {
         this.dm = plugin.getDatabaseManager();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onRespawn(PlayerRespawnEvent event) {
-        final Warrior warrior = dm.getWarrior(event.getPlayer());
-
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            BaseGame game = plugin.getBaseGameFrom(event.getPlayer());
-            if (game != null) {
-                game.onRespawn(warrior);
-            }
-        });
+        plugin.debug("PlayerRespawnEvent for " + event.getPlayer().getName());
+        BaseGame game = plugin.getBaseGameFrom(event.getPlayer());
+        if (game != null) {
+            game.onRespawn(event, dm.getWarrior(event.getPlayer()));
+        }
     }
 }

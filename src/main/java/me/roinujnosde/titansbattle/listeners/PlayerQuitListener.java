@@ -25,7 +25,7 @@ package me.roinujnosde.titansbattle.listeners;
 
 import me.roinujnosde.titansbattle.BaseGame;
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.types.Warrior;
+import me.roinujnosde.titansbattle.managers.DatabaseManager;
 import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.MessageUtils;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,22 +35,22 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
- *
  * @author RoinujNosde
  */
 public class PlayerQuitListener extends TBListener {
+    private final DatabaseManager dm;
 
     public PlayerQuitListener(@NotNull TitansBattle plugin) {
         super(plugin);
+        dm = plugin.getDatabaseManager();
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        Warrior warrior = plugin.getDatabaseManager().getWarrior(player);
         BaseGame game = plugin.getBaseGameFrom(player);
         if (game != null) {
-            game.onDisconnect(warrior);
+            game.onDisconnect(dm.getWarrior(player));
         }
         sendQuitMessage(player);
     }

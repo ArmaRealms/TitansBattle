@@ -7,7 +7,6 @@ import me.roinujnosde.titansbattle.types.Group;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class GroupsCompletion extends AbstractCompletion {

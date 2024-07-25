@@ -3,12 +3,9 @@ package me.roinujnosde.titansbattle.commands.completions;
 import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.InvalidCommandArgument;
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.challenges.ArenaConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class ChallengeCompletion extends AbstractCompletion {
     public ChallengeCompletion(TitansBattle plugin) {

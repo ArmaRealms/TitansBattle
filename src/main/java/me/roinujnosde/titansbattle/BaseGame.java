@@ -24,6 +24,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -142,6 +143,7 @@ public abstract class BaseGame {
             player.sendMessage(getLang("teleport.error"));
             return;
         }
+
         SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
         participants.add(warrior);
         groups.put(warrior, warrior.getGroup());
@@ -183,17 +185,18 @@ public abstract class BaseGame {
     }
 
     public void onDeath(@NotNull Warrior victim, @Nullable Warrior killer) {
+        plugin.debug(String.format("onDeath() -> victim %s, killer %s", victim.getName(), killer));
         if (!isParticipant(victim)) {
             return;
         }
         if (!isLobby()) {
             ParticipantDeathEvent event = new ParticipantDeathEvent(victim, killer);
             Bukkit.getPluginManager().callEvent(event);
-            String gameName = getConfig().getName();
             casualties.add(victim);
             if (getConfig().isGroupMode()) {
                 victim.sendMessage(getLang("watch_to_the_end"));
             }
+            String gameName = getConfig().getName();
             if (killer != null) {
                 killer.increaseKills(gameName);
                 increaseKills(killer);
@@ -231,6 +234,7 @@ public abstract class BaseGame {
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
             Player player = warrior.toOnlinePlayer();
             if (player != null) {
+                plugin.debug(String.format("onDisconnect() -> kill player %s", player.getName()));
                 player.setHealth(0);
             }
             return;
@@ -251,6 +255,7 @@ public abstract class BaseGame {
         }
         Player player = Objects.requireNonNull(warrior.toOnlinePlayer());
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
+            plugin.debug(String.format("onLeave() -> kill player %s", player.getName()));
             player.setHealth(0);
             return;
         }
@@ -259,10 +264,11 @@ public abstract class BaseGame {
         processPlayerExit(warrior);
     }
 
-    public void onRespawn(@NotNull Warrior warrior) {
+    public void onRespawn(PlayerRespawnEvent event, @NotNull Warrior warrior) {
+        plugin.debug(String.format("onRespawn() -> warrior %s", warrior.getName()));
         if (casualties.contains(warrior) && !casualtiesWatching.contains(warrior)) {
-            teleport(warrior, getConfig().getWatchroom());
             casualtiesWatching.add(warrior);
+            event.setRespawnLocation(getConfig().getWatchroom());
         }
     }
 
@@ -300,7 +306,7 @@ public abstract class BaseGame {
 
     public abstract @NotNull Collection<Warrior> getCurrentFighters();
 
-    public HashMap<Warrior, Integer> getKillsCount() {
+    public Map<Warrior, Integer> getKillsCount() {
         return killsCount;
     }
 
@@ -344,10 +350,10 @@ public abstract class BaseGame {
     }
 
     protected boolean teleport(@Nullable Warrior warrior, @NotNull Location destination) {
-        plugin.debug(String.format("teleport() -> destination %s", destination));
+//        plugin.debug(String.format("teleport() -> destination %s", destination));
         Player player = warrior != null ? warrior.toOnlinePlayer() : null;
         if (player == null) {
-            plugin.debug(String.format("teleport() -> warrior %s", warrior));
+//            plugin.debug(String.format("teleport() -> warrior %s", warrior));
             return false;
         }
         SoundUtils.playSound(TELEPORT, plugin.getConfig(), player);
@@ -430,6 +436,7 @@ public abstract class BaseGame {
     }
 
     protected void processPlayerExit(@NotNull Warrior warrior) {
+        plugin.debug(String.format("processPlayerExit() -> warrior %s", warrior.getName()));
         if (!isParticipant(warrior)) {
             return;
         }
@@ -442,7 +449,7 @@ public abstract class BaseGame {
         participants.remove(warrior);
         Group group = getGroup(warrior);
         if (!isLobby()) {
-            runCommandsAfterBattle(Collections.singletonList(warrior));
+            runCommandsAfterBattle(List.of(warrior));
             processRemainingPlayers(warrior);
             //last participant
             if (getConfig().isGroupMode() && group != null && !getGroupParticipants().containsKey(group)) {
@@ -471,10 +478,11 @@ public abstract class BaseGame {
             players.forEach(p -> SoundUtils.playSound(ENEMY_DEATH, plugin.getConfig(), p));
             return;
         }
-        GroupManager groupManager = plugin.getGroupManager();
+
         if (groupManager == null) {
             return;
         }
+
         Group victimGroup = groupManager.getGroup(victim.getUniqueId());
         players.forEach(participant -> {
             Group group = groupManager.getGroup(participant.getUniqueId());
@@ -596,6 +604,7 @@ public abstract class BaseGame {
     }
 
     protected void startPreparation() {
+        plugin.debug("startPreparation()");
         preparation = true;
         addTask(new PreparationTimeTask().runTaskLater(plugin, getConfig().getPreparationTime() * 20L));
         addTask(new CountdownTitleTask(getCurrentFighters(), getConfig().getPreparationTime()).runTaskTimer(plugin, 0L, 20L));
@@ -760,4 +769,5 @@ public abstract class BaseGame {
             });
         }
     }
+
 }
