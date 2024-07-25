@@ -7,33 +7,37 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class BlockUpdateListener extends TBListener {
+public class ProjectileLaunchListener extends TBListener {
     private final GameManager gm;
     private final DatabaseManager dm;
 
-    public BlockUpdateListener(@NotNull TitansBattle plugin) {
+    public ProjectileLaunchListener(@NotNull TitansBattle plugin) {
         super(plugin);
         this.gm = plugin.getGameManager();
         this.dm = plugin.getDatabaseManager();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBreak(BlockBreakEvent event) {
-        cancel(event.getPlayer(), event);
+    public void onBreak(ProjectileLaunchEvent event) {
+        if (event.getEntity().getShooter() instanceof Player player) {
+            cancel(player, event);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlace(BlockPlaceEvent event) {
-        cancel(event.getPlayer(), event);
+    public void onPlace(ProjectileHitEvent event) {
+        if (event.getEntity().getShooter() instanceof Player player) {
+            cancel(player, event);
+        }
     }
 
     private void cancel(Player player, Cancellable event) {
         gm.getCurrentGame().ifPresent(game -> {
-            if (game.getConfig().isCancelBlockInteract() && game.isInBattle(dm.getWarrior(player))) {
+            if ((game.isLobby() || game.isPreparation()) && game.isParticipant(dm.getWarrior(player))) {
                 event.setCancelled(true);
             }
         });

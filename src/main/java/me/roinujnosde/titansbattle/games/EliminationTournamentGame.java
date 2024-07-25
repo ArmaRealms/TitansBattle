@@ -155,7 +155,7 @@ public class EliminationTournamentGame extends Game {
             runCommandsAfterBattle(duelWinners);
         }
         //delaying the next duel, so there is time for other players to respawn
-        Bukkit.getScheduler().runTaskLater(plugin, this::startNextDuel, 100L);
+        Bukkit.getScheduler().runTaskLater(plugin, this::startNextDuel, 20L);
     }
 
     private void processThirdPlaceBattle(List<Warrior> duelWinners) {
