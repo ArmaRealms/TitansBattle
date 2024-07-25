@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -110,6 +111,7 @@ public class EliminationTournamentGame extends Game {
 
     @Override
     protected void processRemainingPlayers(@NotNull Warrior warrior) {
+        plugin.debug("Processing remaining players in EliminationTournamentGame for " + warrior.getName());
         List<Warrior> duelLosers = getDuelLosers(warrior);
         if (!isCurrentDuelist(warrior)) {
             processNotCurrentDuelistLeaving(warrior, duelLosers);
@@ -124,6 +126,7 @@ public class EliminationTournamentGame extends Game {
     }
 
     private void processLoss(@NotNull Warrior warrior, List<Warrior> duelLosers) {
+        plugin.debug("Processing loss in EliminationTournamentGame for " + warrior.getName());
         battle = false;
 
         List<Warrior> duelWinners = getDuelWinners(warrior);
@@ -152,10 +155,11 @@ public class EliminationTournamentGame extends Game {
             runCommandsAfterBattle(duelWinners);
         }
         //delaying the next duel, so there is time for other players to respawn
-        Bukkit.getScheduler().runTaskLater(plugin, this::startNextDuel, 20L);
+        Bukkit.getScheduler().runTaskLater(plugin, this::startNextDuel, 100L);
     }
 
     private void processThirdPlaceBattle(List<Warrior> duelWinners) {
+        plugin.debug("Processing third place battle in EliminationTournamentGame");
         battleForThirdPlace = false;
         thirdPlaceWinners = duelWinners;
         teleport(duelWinners, getConfig().getWatchroom());
@@ -166,6 +170,7 @@ public class EliminationTournamentGame extends Game {
     }
 
     private void heal(@NotNull Player player) {
+        plugin.debug("Healing in EliminationTournamentGame for " + player.getName());
         AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
         if (attribute != null) player.setHealth(attribute.getDefaultValue());
         player.setFoodLevel(20);
@@ -173,6 +178,7 @@ public class EliminationTournamentGame extends Game {
     }
 
     private void processLeavingDuringSemiFinals(@NotNull Warrior warrior) {
+        plugin.debug("Processing leaving during semi-finals in EliminationTournamentGame for " + warrior.getName());
         Player player = warrior.toOnlinePlayer();
         if (player == null) return;
 
@@ -181,6 +187,7 @@ public class EliminationTournamentGame extends Game {
     }
 
     private void processNotCurrentDuelistLeaving(@NotNull Warrior warrior, List<Warrior> duelLosers) {
+        plugin.debug("Processing not current duelists in EliminationTournamentGame for " + warrior.getName());
         removeDuelist(warrior);
         if (getPlayerOrGroupCount() == 2 && getWaitingThirdPlaceCount() == 1) {
             thirdPlaceWinners = new ArrayList<>(waitingThirdPlace);
@@ -208,15 +215,17 @@ public class EliminationTournamentGame extends Game {
     }
 
     @Override
-    public void onRespawn(@NotNull Warrior warrior) {
+    public void onRespawn(PlayerRespawnEvent event, @NotNull Warrior warrior) {
+        plugin.debug("Respawning in EliminationTournamentGame for " + warrior.getName());
         if (waitingThirdPlace.contains(warrior)) {
+            plugin.debug("Respawning in EliminationTournamentGame for " + warrior.getName() + " in third place battle");
             Player player = warrior.toOnlinePlayer();
             if (player == null) return;
             setKit(warrior);
-            teleport(warrior, getConfig().getLobby());
+            event.setRespawnLocation(getConfig().getLobby());
             player.sendMessage(getLang("wait_for_third_place_fight"));
         } else {
-            super.onRespawn(warrior);
+            super.onRespawn(event, warrior);
         }
     }
 
@@ -354,6 +363,7 @@ public class EliminationTournamentGame extends Game {
     }
 
     private void startNextDuel() {
+        plugin.debug("Starting next duel in EliminationTournamentGame");
         if (getPlayerOrGroupCount() <= 1) {
             finish(false);
             return;
@@ -528,15 +538,17 @@ public class EliminationTournamentGame extends Game {
         return group.equals(getGroup(warrior));
     }
 
-    public void hit(Player attacker, Player victim) {
+    public boolean onHit(Player attacker, Player victim) {
         UUID attackerUUID = attacker.getUniqueId();
         hitsCount.put(attackerUUID, hitsCount.getOrDefault(attackerUUID, 0) + 1);
-        if (hitsCount.get(attackerUUID) <= getConfig().getHitAmount()) {
+        if (hitsCount.get(attackerUUID) < getConfig().getHitAmount()) {
             MessageUtils.sendActionBar(attacker, getLang("boxing_hit_count", hitsCount.get(attackerUUID), getConfig().getHitAmount()));
+            return true;
         } else {
             hitsCount.remove(attackerUUID);
             hitsCount.remove(victim.getUniqueId());
-            victim.setHealth(0);
+            plugin.debug(String.format("onHit() - kill player %s", victim.getName()));
+            return false;
         }
     }
 
