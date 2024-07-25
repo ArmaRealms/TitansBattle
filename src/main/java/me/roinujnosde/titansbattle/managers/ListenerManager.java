@@ -11,6 +11,7 @@ import me.roinujnosde.titansbattle.listeners.PlayerMoveListener;
 import me.roinujnosde.titansbattle.listeners.PlayerQuitListener;
 import me.roinujnosde.titansbattle.listeners.PlayerRespawnListener;
 import me.roinujnosde.titansbattle.listeners.PlayerTeleportListener;
+import me.roinujnosde.titansbattle.listeners.ProjectileLaunchListener;
 import me.roinujnosde.titansbattle.listeners.TBListener;
 import org.bukkit.event.HandlerList;
 
@@ -40,6 +41,7 @@ public class ListenerManager {
         registerListener(new PlayerTeleportListener(plugin));
         registerListener(new JoinGameListener(plugin));
         registerListener(new PlayerMoveListener(plugin));
+        registerListener(new ProjectileLaunchListener(plugin));
         plugin.getLogger().info("Registering battle listeners...");
     }
 
