@@ -1,6 +1,8 @@
 package me.roinujnosde.titansbattle.types;
 
-import de.tr7zw.changeme.nbtapi.NBTItem;
+import de.tr7zw.changeme.nbtapi.NBT;
+import de.tr7zw.changeme.nbtapi.iface.ReadWriteItemNBT;
+
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 @SerializableAs("kit")
 public class Kit implements ConfigurationSerializable {
@@ -39,7 +42,7 @@ public class Kit implements ConfigurationSerializable {
         clone(invContents, contents);
     }
 
-    private void clone(ItemStack[] source, ItemStack[] destination) {
+    private void clone(ItemStack @NotNull [] source, ItemStack[] destination) {
         for (int i = 0; i < source.length; i++) {
             ItemStack itemStack = source[i];
             destination[i] = itemStack != null ? itemStack.clone() : null;
@@ -87,10 +90,6 @@ public class Kit implements ConfigurationSerializable {
         return data;
     }
 
-    public ItemStack[] getContents() {
-        return contents;
-    }
-
     public void set(@NotNull Player player) {
         PlayerInventory inventory = player.getInventory();
         inventory.setHelmet(helmet);
@@ -105,7 +104,7 @@ public class Kit implements ConfigurationSerializable {
         return hasItems(inventory.getArmorContents()) || hasItems(inventory.getContents());
     }
 
-    private static boolean hasItems(ItemStack[] items) {
+    private static boolean hasItems(ItemStack @NotNull [] items) {
         for (ItemStack item : items) {
             if (item == null) {
                 continue;
@@ -138,18 +137,26 @@ public class Kit implements ConfigurationSerializable {
         return clone((ItemStack) object);
     }
 
+    private void applyNBTTag(ItemStack item) {
+        NBT.modify(item, (Consumer<ReadWriteItemNBT>) nbtItem -> nbtItem.setBoolean(NBT_TAG, true));
+    }
+
+    private void removeNBTTag(ItemStack item) {
+        NBT.modify(item, (Consumer<ReadWriteItemNBT>) nbtItem -> nbtItem.removeKey(NBT_TAG));
+    }
+
     private ItemStack clone(ItemStack item) {
         if (item != null && item.getType() != Material.AIR) {
             item = item.clone();
-            new NBTItem(item, true).setBoolean(NBT_TAG, true);
+            applyNBTTag(item);
         }
         return item;
     }
 
-    private void setNBTTag(ItemStack[] items) {
+    private void setNBTTag(ItemStack @NotNull [] items) {
         for (ItemStack item : items) {
             if (item != null && item.getType() != Material.AIR) {
-                new NBTItem(item, true).setBoolean(NBT_TAG, true);
+                applyNBTTag(item);
             }
         }
     }
@@ -160,7 +167,7 @@ public class Kit implements ConfigurationSerializable {
             ItemStack item = contents[i];
             if (item != null) {
                 items[i] = item.clone();
-                new NBTItem(items[i], true).removeKey(NBT_TAG);
+                removeNBTTag(items[i]);
             }
         }
         return items;

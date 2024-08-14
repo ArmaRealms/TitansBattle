@@ -314,23 +314,18 @@ public class DatabaseManager {
     }
 
     @NotNull
-    public Warrior getWarrior(@NotNull OfflinePlayer offlinePlayer) {
-        UUID uuid = offlinePlayer.getUniqueId();
-        Warrior warrior = warriors.get(uuid);
-        if (warrior != null) {
-            if (offlinePlayer instanceof Player player) {
-                warrior.setOnlinePlayer(player);
-            }
-        } else {
-            warrior = new Warrior(offlinePlayer, plugin::getGroupManager);
-            warriors.put(uuid, warrior);
-        }
-        return warrior;
+    public Warrior getWarrior(@NotNull OfflinePlayer player) {
+        return getWarrior(player.getUniqueId());
     }
 
     @NotNull
     public Warrior getWarrior(@NotNull UUID uuid) {
-        return getWarrior(Bukkit.getOfflinePlayer(uuid));
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        Warrior warrior = warriors.computeIfAbsent(uuid, (id) -> new Warrior(offlinePlayer, plugin::getGroupManager));
+        if (offlinePlayer instanceof Player player) {
+            warrior.setOnlinePlayer(player);
+        }
+        return warrior;
     }
 
     private void loopThroughGroups() {
