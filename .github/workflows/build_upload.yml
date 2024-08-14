@@ -25,9 +25,12 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
+      - name: Install SimpleClans
+        run: mvn install:install-file -Dfile=libs/SimpleClans-2.19.3-SNAPSHOT.jar -DgroupId=net.sacredlabyrinth.phaed.simpleclans -DartifactId=SimpleClans -Dversion=2.19.3-SNAPSHOT -Dpackaging=jar -f pom.xml
+
       - name: Build with Maven
         run: mvn clean package --file pom.xml
-        
+
       - name: Upload
         uses: actions/upload-artifact@v3.1.0
         with:
