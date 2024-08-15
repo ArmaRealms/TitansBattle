@@ -12,7 +12,9 @@ import me.roinujnosde.titansbattle.listeners.PlayerQuitListener;
 import me.roinujnosde.titansbattle.listeners.PlayerRespawnListener;
 import me.roinujnosde.titansbattle.listeners.PlayerTeleportListener;
 import me.roinujnosde.titansbattle.listeners.ProjectileLaunchListener;
+import me.roinujnosde.titansbattle.listeners.SimpleClansListener;
 import me.roinujnosde.titansbattle.listeners.TBListener;
+import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 
 import java.util.HashSet;
@@ -42,6 +44,9 @@ public class ListenerManager {
         registerListener(new JoinGameListener(plugin));
         registerListener(new PlayerMoveListener(plugin));
         registerListener(new ProjectileLaunchListener(plugin));
+        if (Bukkit.getPluginManager().isPluginEnabled("SimpleClans")) {
+            registerListener(new SimpleClansListener(plugin));
+        }
         plugin.getLogger().info("Registering battle listeners...");
     }
 
