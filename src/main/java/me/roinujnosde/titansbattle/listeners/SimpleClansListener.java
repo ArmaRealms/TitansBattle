@@ -18,7 +18,7 @@ public class SimpleClansListener extends TBListener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onDisbandClan(PrePlayerKickedClanEvent event) {
+    public void onPrePlayerKickedClan(PrePlayerKickedClanEvent event) {
         gm.getCurrentGame().ifPresent(game -> {
             if (game.getConfig().isGroupMode()) {
                 String clanTag = event.getClan().getTag();
