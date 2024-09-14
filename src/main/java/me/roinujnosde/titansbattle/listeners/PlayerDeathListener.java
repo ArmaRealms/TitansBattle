@@ -51,7 +51,6 @@ public class PlayerDeathListener extends TBListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
-        plugin.getLogger().info("PlayerDeathEvent for " + event.getEntity().getName());
         Player victim = event.getEntity();
         Player killer = Helper.getPlayerAttackerOrKiller(victim.getKiller());
 
@@ -66,7 +65,6 @@ public class PlayerDeathListener extends TBListener {
             return;
         }
 
-        plugin.debug(String.format("PlayerDeathEvent for %s in game %s", victim.getName(), game.getConfig().getName()));
         if (game.getConfig().isKeepExp()) {
             event.setKeepLevel(true);
         }
@@ -77,11 +75,6 @@ public class PlayerDeathListener extends TBListener {
         if (game.shouldClearDropsOnDeath(warrior)) {
             event.getDrops().clear();
             event.setDroppedExp(0);
-        }
-        if (killer == null) {
-            plugin.debug("No killer found for " + victim.getName());
-        } else {
-            plugin.debug("Killer found for " + victim.getName() + ": " + killer.getName());
         }
         game.onDeath(warrior, killer != null ? dm.getWarrior(killer) : null);
     }
