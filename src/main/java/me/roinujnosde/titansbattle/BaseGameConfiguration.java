@@ -7,11 +7,17 @@ import me.roinujnosde.titansbattle.types.Prizes;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @SuppressWarnings("FieldMayBeFinal")
@@ -38,6 +44,10 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     private Map<String, Prizes> prizesMap = createPrizesMap();
 
     protected Boolean pvp = true;
+    @Path("boxing")
+    protected Boolean boxing = false;
+    @Path("hit.amount")
+    protected Integer hitAmount = 100;
     @Path("damage-type.melee")
     protected Boolean meleeDamage = true;
     @Path("damage-type.ranged")
@@ -85,6 +95,8 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     protected Integer borderInterval = 120;
     @Path("worldborder.damage")
     protected Double borderDamage = 5.0;
+    @Path("cancel-block-interact")
+    protected Boolean cancelBlockInteract = true;
 
     public @NotNull FileConfiguration getFileConfiguration() {
         if (fileConfiguration == null) {
@@ -109,7 +121,7 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     }
 
     @Override
-    public Map<String, Object> serialize() {
+    public @NotNull Map<String, Object> serialize() {
         return ConfigUtils.serialize(this);
     }
 
@@ -167,6 +179,14 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
 
     public Boolean isPvP() {
         return pvp;
+    }
+
+    public boolean isBoxing() {
+        return boxing;
+    }
+
+    public Integer getHitAmount() {
+        return hitAmount;
     }
 
     public Boolean isMeleeDamage() {
@@ -282,7 +302,7 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
         return prizes;
     }
 
-    private Map<String, Prizes> createPrizesMap() {
+    private @NotNull Map<String, Prizes> createPrizesMap() {
         LinkedHashMap<String, Prizes> map = new LinkedHashMap<>();
         for (Prize p : Prize.values()) {
             map.put(p.name(), new Prizes());
@@ -290,16 +310,21 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
         return map;
     }
 
+    public boolean isCancelBlockInteract() {
+        return cancelBlockInteract;
+    }
+
     public enum Prize implements ConfigurationSerializable {
         FIRST, SECOND, THIRD, KILLER;
 
         @SuppressWarnings("unused")
-        public static Prize deserialize(Map<String, Object> data) {
+        public static Prize deserialize(@NotNull Map<String, Object> data) {
             return Prize.valueOf((String) data.get("prize"));
         }
 
+        @Contract(" -> new")
         @Override
-        public Map<String, Object> serialize() {
+        public @NotNull @Unmodifiable Map<String, Object> serialize() {
             return Collections.singletonMap("prize", this.name());
         }
     }

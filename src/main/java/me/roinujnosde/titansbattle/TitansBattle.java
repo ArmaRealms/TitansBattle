@@ -27,7 +27,16 @@ import me.roinujnosde.titansbattle.dao.ConfigurationDao;
 import me.roinujnosde.titansbattle.games.Game;
 import me.roinujnosde.titansbattle.hooks.discord.DiscordWebhook;
 import me.roinujnosde.titansbattle.hooks.papi.PlaceholderHook;
-import me.roinujnosde.titansbattle.managers.*;
+import me.roinujnosde.titansbattle.managers.ChallengeManager;
+import me.roinujnosde.titansbattle.managers.CommandManager;
+import me.roinujnosde.titansbattle.managers.ConfigManager;
+import me.roinujnosde.titansbattle.managers.DatabaseManager;
+import me.roinujnosde.titansbattle.managers.GameManager;
+import me.roinujnosde.titansbattle.managers.GroupManager;
+import me.roinujnosde.titansbattle.managers.LanguageManager;
+import me.roinujnosde.titansbattle.managers.ListenerManager;
+import me.roinujnosde.titansbattle.managers.SimpleClansGroupManager;
+import me.roinujnosde.titansbattle.managers.TaskManager;
 import me.roinujnosde.titansbattle.types.GameConfiguration;
 import me.roinujnosde.titansbattle.types.Kit;
 import me.roinujnosde.titansbattle.types.Prizes;
@@ -97,10 +106,8 @@ public final class TitansBattle extends JavaPlugin {
         Warrior warrior = getDatabaseManager().getWarrior(player);
 
         Optional<Game> currentGame = getGameManager().getCurrentGame();
-        if (currentGame.isPresent()) {
-            if (currentGame.get().isParticipant(warrior)) {
-                return currentGame.get();
-            }
+        if (currentGame.isPresent() && (currentGame.get().isParticipant(warrior))) {
+            return currentGame.get();
         }
         List<ChallengeRequest<?>> requests = getChallengeManager().getRequests();
         for (ChallengeRequest<?> request : requests) {
@@ -262,7 +269,9 @@ public final class TitansBattle extends JavaPlugin {
                 try {
                     webhook.execute();
                 } catch (IOException e) {
-                    getLogger().log(Level.SEVERE, "Error sending webhook message", e);
+                    if (configManager.isDebug()) {
+                        getLogger().log(Level.SEVERE, "Error sending webhook message", e);
+                    }
                 }
             }
         });

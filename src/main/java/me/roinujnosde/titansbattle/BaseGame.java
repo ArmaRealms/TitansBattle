@@ -1,6 +1,11 @@
 package me.roinujnosde.titansbattle;
 
-import me.roinujnosde.titansbattle.events.*;
+import me.roinujnosde.titansbattle.events.GameStartEvent;
+import me.roinujnosde.titansbattle.events.GroupDefeatedEvent;
+import me.roinujnosde.titansbattle.events.LobbyStartEvent;
+import me.roinujnosde.titansbattle.events.ParticipantDeathEvent;
+import me.roinujnosde.titansbattle.events.PlayerExitGameEvent;
+import me.roinujnosde.titansbattle.events.PlayerJoinGameEvent;
 import me.roinujnosde.titansbattle.exceptions.CommandNotSupportedException;
 import me.roinujnosde.titansbattle.hooks.papi.PlaceholderHook;
 import me.roinujnosde.titansbattle.managers.CommandManager;
@@ -11,13 +16,15 @@ import me.roinujnosde.titansbattle.types.Kit;
 import me.roinujnosde.titansbattle.types.Warrior;
 import me.roinujnosde.titansbattle.utils.MessageUtils;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -26,14 +33,28 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize;
-import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.*;
-import static org.bukkit.ChatColor.*;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.ALLY_DEATH;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.BORDER;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.ENEMY_DEATH;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.JOIN_GAME;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.LEAVE_GAME;
+import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.TELEPORT;
+import static org.bukkit.ChatColor.GREEN;
+import static org.bukkit.ChatColor.RED;
+import static org.bukkit.ChatColor.YELLOW;
 
 public abstract class BaseGame {
 
@@ -43,6 +64,7 @@ public abstract class BaseGame {
 
     protected BaseGameConfiguration config;
     protected boolean lobby;
+    protected boolean preparation;
     protected boolean battle;
     protected final List<Warrior> participants = new ArrayList<>();
     protected final Map<Warrior, Group> groups = new HashMap<>();
@@ -53,7 +75,7 @@ public abstract class BaseGame {
     private final List<BukkitTask> tasks = new ArrayList<>();
     private LobbyAnnouncementTask lobbyTask;
 
-    public BaseGame(TitansBattle plugin, BaseGameConfiguration config) {
+    protected BaseGame(@NotNull TitansBattle plugin, BaseGameConfiguration config) {
         this.plugin = plugin;
         this.groupManager = plugin.getGroupManager();
         this.gameManager = plugin.getGameManager();
@@ -77,8 +99,10 @@ public abstract class BaseGame {
         }
         lobby = true;
         Integer interval = getConfig().getAnnouncementStartingInterval();
-        lobbyTask = new LobbyAnnouncementTask(getConfig().getAnnouncementStartingTimes(), interval);
-        addTask(lobbyTask.runTaskTimer(plugin, 0, interval * 20));
+        Integer startingTimes = getConfig().getAnnouncementStartingTimes();
+        lobbyTask = new LobbyAnnouncementTask(startingTimes, interval);
+        addTask(lobbyTask.runTaskTimer(plugin, 0, interval * 20L));
+        addTask(new LobbyWantingAnnouncementTask((startingTimes + 1L) * interval).runTaskTimerAsynchronously(plugin, 0, 20L));
     }
 
     public void finish(boolean cancelled) {
@@ -119,6 +143,7 @@ public abstract class BaseGame {
             player.sendMessage(getLang("teleport.error"));
             return;
         }
+
         SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
         participants.add(warrior);
         groups.put(warrior, warrior.getGroup());
@@ -130,18 +155,48 @@ public abstract class BaseGame {
         }
     }
 
+    public void onChallengeJoin(@NotNull Warrior warrior) {
+        if (!canJoin(warrior)) {
+            plugin.debug(String.format("Warrior %s can't join", warrior.getName()));
+            return;
+        }
+
+        Player player = warrior.toOnlinePlayer();
+        if (player == null) {
+            plugin.debug(String.format("onChallengeJoin() -> player %s %s == null", warrior.getName(), warrior.getUniqueId()));
+            return;
+        }
+
+        if (!teleport(warrior, getConfig().getLobby())) {
+            plugin.debug(String.format("Player %s is dead: %s", player, player.isDead()), false);
+            player.sendMessage(getLang("teleport.error"));
+            return;
+        }
+
+        SoundUtils.playSound(JOIN_GAME, plugin.getConfig(), player);
+        participants.add(warrior);
+        groups.put(warrior, warrior.getGroup());
+        setKit(warrior);
+        broadcastKey("challenge.player_joined", warrior.getName());
+        player.sendMessage(getLang("objective"));
+        if (participants.size() == getConfig().getMaximumPlayers() && lobbyTask != null) {
+            lobbyTask.processEnd();
+        }
+    }
+
     public void onDeath(@NotNull Warrior victim, @Nullable Warrior killer) {
+        plugin.debug(String.format("onDeath() -> victim %s, killer %s", victim.getName(), killer));
         if (!isParticipant(victim)) {
             return;
         }
         if (!isLobby()) {
             ParticipantDeathEvent event = new ParticipantDeathEvent(victim, killer);
             Bukkit.getPluginManager().callEvent(event);
-            String gameName = getConfig().getName();
             casualties.add(victim);
             if (getConfig().isGroupMode()) {
                 victim.sendMessage(getLang("watch_to_the_end"));
             }
+            String gameName = getConfig().getName();
             if (killer != null) {
                 killer.increaseKills(gameName);
                 increaseKills(killer);
@@ -177,10 +232,9 @@ public abstract class BaseGame {
             plugin.getConfigManager().getClearInventory().add(warrior.getUniqueId());
         }
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            //processInventoryOnExit(warrior);
-            //onDeath(warrior, getLastAttacker(warrior));
             Player player = warrior.toOnlinePlayer();
             if (player != null) {
+                plugin.debug(String.format("onDisconnect() -> kill player %s", player.getName()));
                 player.setHealth(0);
             }
             return;
@@ -201,8 +255,7 @@ public abstract class BaseGame {
         }
         Player player = Objects.requireNonNull(warrior.toOnlinePlayer());
         if (!isLobby() && getCurrentFighters().contains(warrior)) {
-            //processInventoryOnExit(warrior);
-            //onDeath(warrior, getLastAttacker(warrior));
+            plugin.debug(String.format("onLeave() -> kill player %s", player.getName()));
             player.setHealth(0);
             return;
         }
@@ -211,45 +264,11 @@ public abstract class BaseGame {
         processPlayerExit(warrior);
     }
 
-    protected @Nullable Warrior getLastAttacker(@NotNull Warrior victim) {
-        Player player = victim.toOnlinePlayer();
-        EntityDamageEvent event = player != null ? player.getLastDamageCause() : null;
-        if (event instanceof EntityDamageByEntityEvent) {
-            Entity attacker = ((EntityDamageByEntityEvent) event).getDamager();
-            if (attacker instanceof Player) {
-                return plugin.getDatabaseManager().getWarrior((Player) attacker);
-            }
-            if (attacker instanceof Projectile) {
-                return plugin.getDatabaseManager().getWarrior((Player) ((Projectile) attacker).getShooter());
-            }
-        }
-        return null;
-    }
-
-    protected void processInventoryOnExit(@NotNull Warrior warrior) {
-        Player player = warrior.toOnlinePlayer();
-        if (player == null) {
-            plugin.debug("processInventoryOnExit() -> null player");
-            return;
-        }
-        World world = player.getWorld();
-        if (shouldKeepInventoryOnDeath(warrior) || Boolean.parseBoolean(world.getGameRuleValue("keepInventory"))) {
-            return;
-        }
-        if (shouldClearDropsOnDeath(warrior)) {
-            return;
-        }
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
-            world.dropItemNaturally(player.getLocation(), item.clone());
-        }
-        Kit.clearInventory(player);
-    }
-
-    public void onRespawn(@NotNull Warrior warrior) {
+    public void onRespawn(PlayerRespawnEvent event, @NotNull Warrior warrior) {
+        plugin.debug(String.format("onRespawn() -> warrior %s", warrior.getName()));
         if (casualties.contains(warrior) && !casualtiesWatching.contains(warrior)) {
-            teleport(warrior, getConfig().getWatchroom());
             casualtiesWatching.add(warrior);
+            event.setRespawnLocation(getConfig().getWatchroom());
         }
     }
 
@@ -270,11 +289,11 @@ public abstract class BaseGame {
         if (!getConfig().isGroupMode()) {
             return Collections.emptyMap();
         }
-        Map<Group, Integer> groups = new HashMap<>();
+        Map<Group, Integer> groupIntegerMap = new HashMap<>();
         for (Warrior w : participants) {
-            groups.compute(getGroup(w), (g, i) -> i == null ? 1 : i + 1);
+            groupIntegerMap.compute(getGroup(w), (g, i) -> i == null ? 1 : i + 1);
         }
-        return groups;
+        return groupIntegerMap;
     }
 
     protected @Nullable Group getGroup(@NotNull Warrior warrior) {
@@ -287,7 +306,7 @@ public abstract class BaseGame {
 
     public abstract @NotNull Collection<Warrior> getCurrentFighters();
 
-    public HashMap<Warrior, Integer> getKillsCount() {
+    public Map<Warrior, Integer> getKillsCount() {
         return killsCount;
     }
 
@@ -305,7 +324,7 @@ public abstract class BaseGame {
         }
         message = MessageFormat.format(message, args);
         if (message.startsWith("!!broadcast")) {
-            Bukkit.broadcastMessage(message.replace("!!broadcast", ""));
+            Bukkit.broadcast(message.replace("!!broadcast", ""), "titansbattle.broadcast");
         } else {
             for (Warrior warrior : getParticipants()) {
                 warrior.sendMessage(message);
@@ -320,10 +339,9 @@ public abstract class BaseGame {
 
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof BaseGame)) {
+        if (!(other instanceof BaseGame otherGame)) {
             return false;
         }
-        BaseGame otherGame = (BaseGame) other;
         return otherGame.getConfig().getName().equals(getConfig().getName());
     }
 
@@ -332,10 +350,10 @@ public abstract class BaseGame {
     }
 
     protected boolean teleport(@Nullable Warrior warrior, @NotNull Location destination) {
-        plugin.debug(String.format("teleport() -> destination %s", destination));
+//        plugin.debug(String.format("teleport() -> destination %s", destination));
         Player player = warrior != null ? warrior.toOnlinePlayer() : null;
         if (player == null) {
-            plugin.debug(String.format("teleport() -> warrior %s", warrior));
+//            plugin.debug(String.format("teleport() -> warrior %s", warrior));
             return false;
         }
         SoundUtils.playSound(TELEPORT, plugin.getConfig(), player);
@@ -361,13 +379,15 @@ public abstract class BaseGame {
 
     protected void givePrizes(Prize prize, @Nullable Group group, @Nullable List<Warrior> warriors) {
         List<Player> leaders = new ArrayList<>();
-        List<Player> members = new ArrayList<>();
-        if (warriors == null) {
-            return;
-        }
-        List<Player> players = warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        List<Player> members;
+        if (warriors == null) return;
+        List<Player> players = new ArrayList<>(warriors.stream()
+                .map(Warrior::toOnlinePlayer)
+                .filter(Objects::nonNull)
+                .toList());
+
         if (group != null) {
+            members = new ArrayList<>();
             for (Player p : players) {
                 if (group.isLeaderOrOfficer(p.getUniqueId())) {
                     leaders.add(p);
@@ -376,7 +396,7 @@ public abstract class BaseGame {
                 }
             }
         } else {
-            members = players;
+            members = new ArrayList<>(players);
         }
         getConfig().getPrizes(prize).give(plugin, leaders, members);
     }
@@ -385,18 +405,16 @@ public abstract class BaseGame {
         GameStartEvent event = new GameStartEvent(this);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
-            broadcastKey("cancelled", "CONSOLE");
+            broadcastKey("cancelled", "Server");
             return false;
         }
         if (getParticipants().size() < getConfig().getMinimumPlayers()) {
             broadcastKey("not_enough_participants");
             return false;
         }
-        if (getConfig().isGroupMode()) {
-            if (getGroupParticipants().size() < getConfig().getMinimumGroups()) {
-                broadcastKey("not_enough_participants");
-                return false;
-            }
+        if (getConfig().isGroupMode() && getGroupParticipants().size() < getConfig().getMinimumGroups()) {
+            broadcastKey("not_enough_participants");
+            return false;
         }
         return true;
     }
@@ -418,6 +436,7 @@ public abstract class BaseGame {
     }
 
     protected void processPlayerExit(@NotNull Warrior warrior) {
+        plugin.debug(String.format("processPlayerExit() -> warrior %s", warrior.getName()));
         if (!isParticipant(warrior)) {
             return;
         }
@@ -430,7 +449,7 @@ public abstract class BaseGame {
         participants.remove(warrior);
         Group group = getGroup(warrior);
         if (!isLobby()) {
-            runCommandsAfterBattle(Collections.singletonList(warrior));
+            runCommandsAfterBattle(List.of(warrior));
             processRemainingPlayers(warrior);
             //last participant
             if (getConfig().isGroupMode() && group != null && !getGroupParticipants().containsKey(group)) {
@@ -459,10 +478,11 @@ public abstract class BaseGame {
             players.forEach(p -> SoundUtils.playSound(ENEMY_DEATH, plugin.getConfig(), p));
             return;
         }
-        GroupManager groupManager = plugin.getGroupManager();
+
         if (groupManager == null) {
             return;
         }
+
         Group victimGroup = groupManager.getGroup(victim.getUniqueId());
         players.forEach(participant -> {
             Group group = groupManager.getGroup(participant.getUniqueId());
@@ -549,10 +569,10 @@ public abstract class BaseGame {
         }
 
         if (config.isGroupMode()) {
-            List<Group> groups = warriors.stream().map(this::getGroup).distinct().collect(Collectors.toList());
+            List<Group> groupList = warriors.stream().map(this::getGroup).distinct().toList();
 
-            for (int i = 0; i < groups.size(); i++) {
-                Set<Warrior> groupWarriors = Objects.requireNonNull(plugin.getGroupManager()).getWarriors(groups.get(i));
+            for (int i = 0; i < groupList.size(); i++) {
+                Set<Warrior> groupWarriors = Objects.requireNonNull(plugin.getGroupManager()).getWarriors(groupList.get(i));
                 groupWarriors.retainAll(warriors);
 
                 teleport(groupWarriors, arenaEntrances.get(i % arenaEntrances.size()));
@@ -584,13 +604,29 @@ public abstract class BaseGame {
     }
 
     protected void startPreparation() {
-        addTask(new PreparationTimeTask().runTaskLater(plugin, getConfig().getPreparationTime() * 20));
+        plugin.debug("startPreparation()");
+        preparation = true;
+        addTask(new PreparationTimeTask().runTaskLater(plugin, getConfig().getPreparationTime() * 20L));
         addTask(new CountdownTitleTask(getCurrentFighters(), getConfig().getPreparationTime()).runTaskTimer(plugin, 0L, 20L));
         if (getConfig().isWorldBorder()) {
             long borderInterval = getConfig().getBorderInterval() * 20L;
             WorldBorder worldBorder = getConfig().getBorderCenter().getWorld().getWorldBorder();
             addTask(new BorderTask(worldBorder).runTaskTimer(plugin, borderInterval, borderInterval));
         }
+    }
+
+    public boolean isPreparation() {
+        return preparation;
+    }
+
+    private ChatColor getColor(long timer) {
+        ChatColor color = GREEN;
+        if (timer <= 3) {
+            color = RED;
+        } else if (timer <= 7) {
+            color = YELLOW;
+        }
+        return color;
     }
 
     public class LobbyAnnouncementTask extends BukkitRunnable {
@@ -617,12 +653,34 @@ public abstract class BaseGame {
             if (canStartBattle()) {
                 lobby = false;
                 onLobbyEnd();
-                addTask(new GameExpirationTask().runTaskLater(plugin, getConfig().getExpirationTime() * 20));
+                addTask(new GameExpirationTask().runTaskLater(plugin, getConfig().getExpirationTime() * 20L));
             } else {
+                broadcastKey("cancelled", "Server");
                 finish(true);
             }
             this.cancel();
             lobbyTask = null;
+        }
+    }
+
+    public class LobbyWantingAnnouncementTask extends BukkitRunnable {
+        private long seconds;
+
+        public LobbyWantingAnnouncementTask(long seconds) {
+            this.seconds = seconds;
+        }
+
+        @Override
+        public void run() {
+            if (seconds > 0) {
+                seconds--;
+                participants.stream()
+                        .map(Warrior::toOnlinePlayer)
+                        .filter(Objects::nonNull)
+                        .forEach(p -> p.sendTitle(getColor(seconds) + "" + seconds, ""));
+            } else {
+                this.cancel();
+            }
         }
     }
 
@@ -667,6 +725,7 @@ public abstract class BaseGame {
             broadcastKey("preparation_over");
             runCommandsBeforeBattle(getCurrentFighters());
             battle = true;
+            preparation = false;
         }
     }
 
@@ -686,10 +745,10 @@ public abstract class BaseGame {
         @SuppressWarnings("deprecation")
         @Override
         public void run() {
-            List<Player> players = warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull).collect(Collectors.toList());
+            List<Player> players = warriors.stream().map(Warrior::toOnlinePlayer).filter(Objects::nonNull).toList();
             String title;
             if (timer > 0) {
-                title = getColor() + "" + timer;
+                title = getColor(timer) + "" + timer;
             } else {
                 title = RED + getLang("title.fight");
                 this.cancel();
@@ -697,16 +756,6 @@ public abstract class BaseGame {
             }
             players.forEach(player -> player.sendTitle(title, ""));
             timer--;
-        }
-
-        private ChatColor getColor() {
-            ChatColor color = GREEN;
-            if (timer <= 3) {
-                color = RED;
-            } else if (timer <= 7) {
-                color = YELLOW;
-            }
-            return color;
         }
     }
 
@@ -720,4 +769,5 @@ public abstract class BaseGame {
             });
         }
     }
+
 }

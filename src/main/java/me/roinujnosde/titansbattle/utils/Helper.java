@@ -16,8 +16,14 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 public class Helper {
 
@@ -177,7 +183,7 @@ public class Helper {
 
     @NotNull
     public static List<UUID> warriorListToUuidList(@NotNull List<Warrior> players) {
-        return players.stream().map(Warrior::getUniqueId).collect(Collectors.toList());
+        return players.stream().map(Warrior::getUniqueId).toList();
     }
 
     /**
@@ -282,17 +288,16 @@ public class Helper {
      * @return the attacker/killer or null
      */
     public static @Nullable Player getPlayerAttackerOrKiller(Entity entity) {
-        Player investigated = null;
-        if (entity instanceof Player) {
-            investigated = (Player) entity;
+        if (entity instanceof Player player) {
+            return player;
         }
-        if (entity instanceof Projectile) {
-            ProjectileSource shooter = ((Projectile) entity).getShooter();
-            if (shooter instanceof Player) {
-                investigated = (Player) shooter;
+        if (entity instanceof Projectile projectile) {
+            ProjectileSource shooter = projectile.getShooter();
+            if (shooter instanceof Player playerShooter) {
+                return playerShooter;
             }
         }
-        return investigated;
+        return null;
     }
 
     /**

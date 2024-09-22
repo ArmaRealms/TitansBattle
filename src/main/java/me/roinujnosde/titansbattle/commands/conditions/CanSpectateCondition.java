@@ -13,9 +13,9 @@ import me.roinujnosde.titansbattle.challenges.ChallengeRequest;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-public class ArenaReadyCondition extends AbstractParameterCondition<ArenaConfiguration> {
+public class CanSpectateCondition extends AbstractParameterCondition<ArenaConfiguration> {
 
-    public ArenaReadyCondition(TitansBattle plugin) {
+    public CanSpectateCondition(TitansBattle plugin) {
         super(plugin);
     }
 
@@ -33,25 +33,20 @@ public class ArenaReadyCondition extends AbstractParameterCondition<ArenaConfigu
             throw new ConditionFailedException();
         }
         boolean matches = getChallengeManager().getRequests().stream().map(ChallengeRequest::getChallenge)
-                .map(Challenge::getConfig).anyMatch(config -> config.equals(value));
+                .map(Challenge::getConfig).noneMatch(config -> config.equals(value));
         if (matches) {
-            cec.getIssuer().sendMessage(plugin.getLang("arena.in.use"));
+            cec.getIssuer().sendMessage(plugin.getLang("no.challenge.in.arena"));
             throw new ConditionFailedException();
         }
         if (!value.locationsSet()) {
             cc.getIssuer().sendMessage(plugin.getLang("this.arena.isnt.ready"));
             throw new ConditionFailedException();
         }
-        boolean groupMode = Boolean.parseBoolean(cc.getConfigValue("group", "false"));
-        if (groupMode != value.isGroupMode()) {
-            cc.getIssuer().sendMessage(plugin.getLang("group.mode.not.supported"));
-            throw new ConditionFailedException();
-        }
     }
 
     @Override
     public @NotNull String getId() {
-        return "ready";
+        return "can_spectate";
     }
 
     @Contract(" -> new")

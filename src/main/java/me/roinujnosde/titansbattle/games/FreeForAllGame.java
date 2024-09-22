@@ -4,7 +4,11 @@ import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.events.GroupWinEvent;
 import me.roinujnosde.titansbattle.events.PlayerWinEvent;
 import me.roinujnosde.titansbattle.managers.GroupManager;
-import me.roinujnosde.titansbattle.types.*;
+import me.roinujnosde.titansbattle.types.GameConfiguration;
+import me.roinujnosde.titansbattle.types.Group;
+import me.roinujnosde.titansbattle.types.Kit;
+import me.roinujnosde.titansbattle.types.Warrior;
+import me.roinujnosde.titansbattle.types.Winners;
 import me.roinujnosde.titansbattle.utils.Helper;
 import me.roinujnosde.titansbattle.utils.SoundUtils;
 import org.bukkit.Bukkit;
@@ -16,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.FIRST;
 import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.KILLER;
@@ -107,7 +110,7 @@ public class FreeForAllGame extends Game {
         if (getConfig().isGroupMode()) {
             winnerGroup = getGroup(warrior);
             //noinspection ConstantConditions
-            winners = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId())).collect(Collectors.toList());
+            winners = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId())).toList();
         } else {
             winners.add(warrior);
         }

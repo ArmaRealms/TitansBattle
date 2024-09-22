@@ -1,6 +1,7 @@
 package me.roinujnosde.titansbattle.challenges;
 
 import me.roinujnosde.titansbattle.BaseGame;
+import me.roinujnosde.titansbattle.BaseGameConfiguration;
 import me.roinujnosde.titansbattle.TitansBattle;
 import me.roinujnosde.titansbattle.events.GroupWinEvent;
 import me.roinujnosde.titansbattle.events.PlayerWinEvent;
@@ -13,10 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static me.roinujnosde.titansbattle.BaseGameConfiguration.Prize.FIRST;
-import static me.roinujnosde.titansbattle.utils.SoundUtils.Type.VICTORY;
+import java.util.Objects;
 
 public class Challenge extends BaseGame {
 
@@ -42,7 +40,7 @@ public class Challenge extends BaseGame {
 
     @Override
     protected void onLobbyEnd() {
-        broadcastKey("game_started", getConfig().getPreparationTime());
+        broadcastKey("game_started", getConfig().getPreparationTime(), getConfig().getName());
         teleportToArena(getParticipants());
         startPreparation();
     }
@@ -100,8 +98,8 @@ public class Challenge extends BaseGame {
         PlayerWinEvent event = new PlayerWinEvent(this, winners);
         Bukkit.getPluginManager().callEvent(event);
         String winnerName = getConfig().isGroupMode() ? winnerGroup.getName() : winners.get(0).getName();
-        SoundUtils.playSound(VICTORY, plugin.getConfig(), winners);
-        givePrizes(FIRST, winnerGroup, winners);
+        SoundUtils.playSound(SoundUtils.Type.VICTORY, plugin.getConfig(), winners);
+        givePrizes(BaseGameConfiguration.Prize.FIRST, winnerGroup, winners);
         broadcastKey("who_won", winnerName, getLoserName());
         discordAnnounce("discord_who_won", winnerName, getLoserName());
     }
@@ -113,7 +111,7 @@ public class Challenge extends BaseGame {
         }
         if (getConfig().isGroupMode()) {
             winnerGroup = getGroup(warrior);
-            winners = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId())).collect(Collectors.toList());
+            winners = getParticipants().stream().filter(p -> winnerGroup.isMember(p.getUniqueId())).toList();
         } else {
             winners.add(warrior);
         }
@@ -130,6 +128,29 @@ public class Challenge extends BaseGame {
             return lastCasualty.getName();
         }
         
-        return getGroup(lastCasualty).getName();
+        return Objects.requireNonNull(getGroup(lastCasualty)).getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        Challenge challenge = (Challenge) o;
+
+        if (!Objects.equals(winnerGroup, challenge.winnerGroup))
+            return false;
+        if (!Objects.equals(winners, challenge.winners)) return false;
+        return Objects.equals(lastCasualty, challenge.lastCasualty);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (winnerGroup != null ? winnerGroup.hashCode() : 0);
+        result = 31 * result + (winners != null ? winners.hashCode() : 0);
+        result = 31 * result + (lastCasualty != null ? lastCasualty.hashCode() : 0);
+        return result;
     }
 }

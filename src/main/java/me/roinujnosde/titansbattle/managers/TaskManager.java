@@ -24,18 +24,24 @@
 package me.roinujnosde.titansbattle.managers;
 
 import me.roinujnosde.titansbattle.TitansBattle;
+import me.roinujnosde.titansbattle.types.Event;
 import me.roinujnosde.titansbattle.types.GameConfiguration;
 import me.roinujnosde.titansbattle.types.Prizes;
-import me.roinujnosde.titansbattle.types.Event;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author RoinujNosde
@@ -79,21 +85,25 @@ public class TaskManager {
         giveItemsTask = new GiveItemsTask().runTaskTimer(plugin, interval, interval);
     }
 
-    private TimerTask createTimerTask(Event event) {
+    @Contract(value = "_ -> new", pure = true)
+    private @NotNull TimerTask createTimerTask(Event event) {
         return new TimerTask() {
             @Override
             public void run() {
                 Optional<GameConfiguration> config = plugin.getConfigurationDao()
                         .getConfiguration(event.getGameName(), GameConfiguration.class);
-                if (!config.isPresent()) {
+                if (config.isEmpty()) {
                     plugin.getLogger().warning(String.format("Game %s not found!", event.getGameName()));
                     return;
                 }
-                if (plugin.getGameManager().getCurrentGame().isPresent()) {
-                    plugin.getLogger().info("There is a game running. Skipping event.");
-                    return;
-                }
-                Bukkit.getScheduler().runTask(plugin, () -> plugin.getGameManager().start(config.get()));
+//                if (plugin.getGameManager().getCurrentGame().isPresent()) {
+//                    plugin.getLogger().info("There is a game running. Skipping event.");
+//                    return;
+//                }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    plugin.getGameManager().getCurrentGame().ifPresent(game -> game.cancel(Bukkit.getConsoleSender()));
+                    plugin.getGameManager().start(config.get());
+                });
             }
         };
     }

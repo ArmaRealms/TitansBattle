@@ -3,24 +3,24 @@ package me.roinujnosde.titansbattle.commands.completions;
 import co.aikar.commands.BukkitCommandCompletionContext;
 import co.aikar.commands.InvalidCommandArgument;
 import me.roinujnosde.titansbattle.TitansBattle;
-import me.roinujnosde.titansbattle.types.GameConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
-public class GamesCompletion extends AbstractCompletion {
-    public GamesCompletion(TitansBattle plugin) {
+public class ChallengeCompletion extends AbstractCompletion {
+    public ChallengeCompletion(TitansBattle plugin) {
         super(plugin);
     }
 
     @Override
     public @NotNull String getId() {
-        return "games";
+        return "challenge";
     }
 
     @Override
     public Collection<String> getCompletions(BukkitCommandCompletionContext context) throws InvalidCommandArgument {
-        return getConfigurationDao().getConfigurations(GameConfiguration.class).stream()
-                .map(GameConfiguration::getName).toList();
+        return getChallengeManager().getChallenges().stream()
+                .map(cr -> cr.getConfig().getName())
+                .toList();
     }
 }

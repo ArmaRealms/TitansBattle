@@ -42,7 +42,7 @@ public class Kit implements ConfigurationSerializable {
         clone(invContents, contents);
     }
 
-    private void clone(ItemStack[] source, ItemStack[] destination) {
+    private void clone(ItemStack @NotNull [] source, ItemStack[] destination) {
         for (int i = 0; i < source.length; i++) {
             ItemStack itemStack = source[i];
             destination[i] = itemStack != null ? itemStack.clone() : null;
@@ -90,10 +90,6 @@ public class Kit implements ConfigurationSerializable {
         return data;
     }
 
-    public ItemStack[] getContents() {
-        return contents;
-    }
-
     public void set(@NotNull Player player) {
         PlayerInventory inventory = player.getInventory();
         inventory.setHelmet(helmet);
@@ -108,7 +104,7 @@ public class Kit implements ConfigurationSerializable {
         return hasItems(inventory.getArmorContents()) || hasItems(inventory.getContents());
     }
 
-    private static boolean hasItems(ItemStack[] items) {
+    private static boolean hasItems(ItemStack @NotNull [] items) {
         for (ItemStack item : items) {
             if (item == null) {
                 continue;
@@ -145,6 +141,10 @@ public class Kit implements ConfigurationSerializable {
         NBT.modify(item, (Consumer<ReadWriteItemNBT>) nbtItem -> nbtItem.setBoolean(NBT_TAG, true));
     }
 
+    private void removeNBTTag(ItemStack item) {
+        NBT.modify(item, (Consumer<ReadWriteItemNBT>) nbtItem -> nbtItem.removeKey(NBT_TAG));
+    }
+
     private ItemStack clone(ItemStack item) {
         if (item != null && item.getType() != Material.AIR) {
             item = item.clone();
@@ -153,11 +153,23 @@ public class Kit implements ConfigurationSerializable {
         return item;
     }
 
-    private void setNBTTag(ItemStack[] items) {
+    private void setNBTTag(ItemStack @NotNull [] items) {
         for (ItemStack item : items) {
             if (item != null && item.getType() != Material.AIR) {
                 applyNBTTag(item);
             }
         }
+    }
+
+    public ItemStack[] getContentsWithoutNBT() {
+        ItemStack[] items = new ItemStack[contents.length];
+        for (int i = 0; i < contents.length; i++) {
+            ItemStack item = contents[i];
+            if (item != null) {
+                items[i] = item.clone();
+                removeNBTTag(items[i]);
+            }
+        }
+        return items;
     }
 }

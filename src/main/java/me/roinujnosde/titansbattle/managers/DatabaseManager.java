@@ -83,25 +83,25 @@ public class DatabaseManager {
     public void setup() {
         try (Statement statement = getConnection().createStatement()) {
             statement.execute("CREATE TABLE IF NOT EXISTS tb_warriors "
-                              + "(displayname varchar(30) NOT NULL,"
-                              + " uuid varchar(255) NOT NULL,"
-                              + " kills int NOT NULL,"
-                              + " deaths int NOT NULL,"
-                              + " victories int NOT NULL,"
-                              + " game varchar(20) NOT NULL);");
+                    + "(displayname varchar(30) NOT NULL,"
+                    + " uuid varchar(255) NOT NULL,"
+                    + " kills int NOT NULL,"
+                    + " deaths int NOT NULL,"
+                    + " victories int NOT NULL,"
+                    + " game varchar(20) NOT NULL);");
             statement.execute("CREATE TABLE IF NOT EXISTS tb_groups"
-                              + "(identification varchar(255) NOT NULL,"
-                              + " kills int NOT NULL,"
-                              + " deaths int NOT NULL,"
-                              + " victories int NOT NULL,"
-                              + " defeats int NOT NULL,"
-                              + " game varchar(20) NOT NULL);");
+                    + "(identification varchar(255) NOT NULL,"
+                    + " kills int NOT NULL,"
+                    + " deaths int NOT NULL,"
+                    + " victories int NOT NULL,"
+                    + " defeats int NOT NULL,"
+                    + " game varchar(20) NOT NULL);");
             statement.execute("CREATE TABLE IF NOT EXISTS tb_winners"
-                              + "(date varchar(10) NOT NULL,"
-                              + " killer varchar(255),"
-                              + " player_winners text,"
-                              + " winner_group varchar(255),"
-                              + " game varchar(20) NOT NULL);");
+                    + "(date varchar(10) NOT NULL,"
+                    + " killer varchar(255),"
+                    + " player_winners text,"
+                    + " winner_group varchar(255),"
+                    + " game varchar(20) NOT NULL);");
         } catch (SQLException ex) {
             plugin.debug("Error while creating the tables: " + ex.getMessage(), false);
         }
@@ -116,7 +116,7 @@ public class DatabaseManager {
             String username = cm.getSqlUsername();
             String password = cm.getSqlPassword();
             connection = DriverManager.getConnection("jdbc:mysql://" + hostname + ":" + port + "/" + database +
-                                                     "?useSSL=false", username, password);
+                    "?useSSL=false", username, password);
         } else {
             File dbFile = new File(plugin.getDataFolder().getAbsolutePath() + File.separator + database + ".db");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
@@ -205,7 +205,7 @@ public class DatabaseManager {
         HashSet<GameConfiguration> updated = new HashSet<>();
 
         String update = "UPDATE tb_groups SET kills=?, deaths=?, victories=?,"
-                        + " defeats=? WHERE identification=? AND game=?;";
+                + " defeats=? WHERE identification=? AND game=?;";
         try (PreparedStatement statement = getConnection().prepareStatement(update)) {
             for (GameConfiguration game : getGames()) {
                 String gameName = game.getName();
@@ -322,8 +322,8 @@ public class DatabaseManager {
     public Warrior getWarrior(@NotNull UUID uuid) {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Warrior warrior = warriors.computeIfAbsent(uuid, (id) -> new Warrior(offlinePlayer, plugin::getGroupManager));
-        if (offlinePlayer instanceof Player) {
-            warrior.setOnlinePlayer((Player) offlinePlayer);
+        if (offlinePlayer instanceof Player player) {
+            warrior.setOnlinePlayer(player);
         }
         return warrior;
     }

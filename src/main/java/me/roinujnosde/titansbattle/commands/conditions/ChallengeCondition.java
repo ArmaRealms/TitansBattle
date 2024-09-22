@@ -4,30 +4,24 @@ import co.aikar.commands.BukkitCommandIssuer;
 import co.aikar.commands.ConditionContext;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.InvalidCommandArgument;
-import me.roinujnosde.titansbattle.BaseGame;
 import me.roinujnosde.titansbattle.TitansBattle;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class ParticipantCondition extends AbstractCommandCondition {
-
-    public ParticipantCondition(TitansBattle plugin) {
+public class ChallengeCondition extends AbstractCommandCondition {
+    public ChallengeCondition(TitansBattle plugin) {
         super(plugin);
     }
 
     @Override
-    public @NotNull String getId() {
-        return "participant";
+    public void validateCondition(ConditionContext<BukkitCommandIssuer> context) throws InvalidCommandArgument {
+        if (getChallengeManager().getChallenges().isEmpty()) {
+            context.getIssuer().sendMessage(plugin.getLang("challenge-not-starting-or-started"));
+            throw new ConditionFailedException();
+        }
     }
 
     @Override
-    public void validateCondition(ConditionContext<BukkitCommandIssuer> context) throws InvalidCommandArgument {
-        Player player = context.getIssuer().getPlayer();
-        BaseGame game = plugin.getBaseGameFrom(player);
-        if (game == null) {
-            player.sendMessage(plugin.getLang("not_participating"));
-            throw new ConditionFailedException();
-        }
-
+    public @NotNull String getId() {
+        return "challenge";
     }
 }

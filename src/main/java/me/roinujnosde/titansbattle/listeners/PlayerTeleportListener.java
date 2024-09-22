@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 
-import static org.bukkit.event.player.PlayerTeleportEvent.*;
+import static org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 public class PlayerTeleportListener extends TBListener {
 
