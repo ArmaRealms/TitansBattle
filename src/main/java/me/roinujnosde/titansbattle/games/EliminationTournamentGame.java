@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -84,12 +85,18 @@ public class EliminationTournamentGame extends Game {
     private List<Warrior> getDuelWinners(@NotNull Warrior defeated) {
         List<Warrior> list = new ArrayList<>();
         if (getConfig().isGroupMode()) {
-            Group winnerGroup = Objects.requireNonNull(getFirstGroupDuel().get().getOther(getGroup(defeated)));
-            list = getParticipants().stream().filter(p -> isMember(winnerGroup, p))
-                    .collect(Collectors.toList());
+            Optional<Duel<Group>> firstGroupDuel = getFirstGroupDuel();
+            if (firstGroupDuel.isPresent()) {
+                Group winnerGroup = Objects.requireNonNull(firstGroupDuel.get().getOther(getGroup(defeated)));
+                list = getParticipants().stream().filter(p -> isMember(winnerGroup, p))
+                        .collect(Collectors.toList());
+            }
         } else {
-            Warrior other = getFirstWarriorDuel().get().getOther(defeated);
-            list.add(other);
+            Optional<Duel<Warrior>> firstWarriorDuel = getFirstWarriorDuel();
+            if (firstWarriorDuel.isPresent()) {
+                Warrior other = firstWarriorDuel.get().getOther(defeated);
+                list.add(other);
+            }
         }
         return list;
     }
@@ -165,12 +172,16 @@ public class EliminationTournamentGame extends Game {
         removeDuelist(warrior);
     }
 
-    private void heal(@NotNull Player player) {
-        plugin.debug("Healing in EliminationTournamentGame for " + player.getName());
-        AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-        if (attribute != null) player.setHealth(attribute.getDefaultValue());
-        player.setFoodLevel(20);
-        player.setFireTicks(0);
+    private void heal(@NotNull List<Warrior> warriors) {
+        for (Warrior warrior : warriors) {
+            Player player = warrior.toOnlinePlayer();
+            if (player == null) continue;
+            plugin.debug("Healing in EliminationTournamentGame for %s".formatted(player.getName()));
+            AttributeInstance attribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            if (attribute != null) player.setHealth(attribute.getDefaultValue());
+            player.setFoodLevel(20);
+            player.setFireTicks(0);
+        }
     }
 
     private boolean lost(@NotNull Warrior warrior) {
@@ -473,15 +484,23 @@ public class EliminationTournamentGame extends Game {
     protected @NotNull String getGameInfoMessage() {
         String gameInfo = getLang("game_info_duels");
         String nextDuels = getLang("game_info_next_duels");
-        String[] firstDuel;
+        String[] firstDuel = new String[2];
         StringBuilder builder = new StringBuilder();
+
         if (getConfig().isGroupMode()) {
-            firstDuel = duelToNameArray(getFirstGroupDuel(), Group::getName);
+            Optional<Duel<Group>> firstGroupDuel = getFirstGroupDuel();
+            if (firstGroupDuel.isPresent()) {
+                firstDuel = duelToNameArray(firstGroupDuel.get(), Group::getName);
+            }
             populateDuelsMessage(builder, groupDuelists, Group::getName);
         } else {
-            firstDuel = duelToNameArray(getFirstWarriorDuel(), Warrior::getName);
+            Optional<Duel<Warrior>> firstWarriorDuel = getFirstWarriorDuel();
+            if (firstWarriorDuel.isPresent()) {
+                firstDuel = duelToNameArray(firstWarriorDuel.get(), Warrior::getName);
+            }
             populateDuelsMessage(builder, playerDuelists, Warrior::getName);
         }
+
         if (isMultipleDuels()) {
             gameInfo = gameInfo + nextDuels;
         }
@@ -495,9 +514,11 @@ public class EliminationTournamentGame extends Game {
             for (int i = 1; i < list.size(); i++) {
                 Duel<D> duel = list.get(i);
                 if (!duel.isValid()) continue;
-
-                @NotNull String[] name = duelToNameArray(Optional.of(duel), getName);
-                builder.append(MessageFormat.format(nextDuelsLineMessage, i, name[0], name[1]));
+                Optional<Duel<Warrior>> optionalDuel = getFirstWarriorDuel();
+                if (optionalDuel.isPresent()) {
+                    String[] names = duelToNameArray(optionalDuel.get(), Warrior::getName);
+                    builder.append(MessageFormat.format(nextDuelsLineMessage, i, names[0], names[1]));
+                }
             }
         }
     }
@@ -507,11 +528,11 @@ public class EliminationTournamentGame extends Game {
         return duels.stream().filter(Duel::isValid).count() > 1;
     }
 
-    private <D> String[] duelToNameArray(Optional<Duel<D>> duel, Function<D, String> getName) {
-        if (!duel.isPresent()) {
-            return new String[]{"", ""};
-        }
-        return duel.get().getDuelists().stream().filter(Objects::nonNull).map(getName).toArray(String[]::new);
+    private <D> String[] duelToNameArray(Duel<D> duel, Function<D, String> getName) {
+        return duel.getDuelists().stream()
+                .filter(Objects::nonNull)
+                .map(getName)
+                .toArray(String[]::new);
     }
 
     private boolean isMember(Group group, Warrior warrior) {
@@ -532,4 +553,25 @@ public class EliminationTournamentGame extends Game {
         }
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof EliminationTournamentGame that)) return false;
+        if (!super.equals(o)) return false;
+
+        return thirdPlaceBattle == that.thirdPlaceBattle && playerDuelists.equals(that.playerDuelists) && groupDuelists.equals(that.groupDuelists) && waitingThirdPlace.equals(that.waitingThirdPlace) && firstPlaceWinners.equals(that.firstPlaceWinners) && Objects.equals(secondPlaceWinners, that.secondPlaceWinners) && Objects.equals(thirdPlaceWinners, that.thirdPlaceWinners) && hitsCount.equals(that.hitsCount);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + playerDuelists.hashCode();
+        result = 31 * result + groupDuelists.hashCode();
+        result = 31 * result + waitingThirdPlace.hashCode();
+        result = 31 * result + Boolean.hashCode(thirdPlaceBattle);
+        result = 31 * result + firstPlaceWinners.hashCode();
+        result = 31 * result + Objects.hashCode(secondPlaceWinners);
+        result = 31 * result + Objects.hashCode(thirdPlaceWinners);
+        result = 31 * result + hitsCount.hashCode();
+        return result;
+    }
 }
