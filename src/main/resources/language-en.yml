@@ -140,6 +140,7 @@ discord_who_won_tournament: "» Game over! Winners are:\n  &b1# &f{0}\n  &b2# &f
 discord_who_won_killer: "» Game over! Killer is: {0} Kills: {1}."
 wait_for_third_place_fight: "&b» Wait, you'll be fighting for third place!"
 boxing_hit_count: "&cHits: &e{0}&7/&c{1}"
+not.enough.playtime: "&c» You don't have enough playtime to join this game! You need to play more {0} to join."
 players-ranking:
     victories-title: "V"
     kills-title: "K"
