@@ -142,7 +142,7 @@ public abstract class BaseGame {
         }
 
 
-        int playtimeInSeconds = player.getStatistic(Statistic.PLAY_ONE_TICK) / 20;
+        int playtimeInSeconds = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20;
         int minimumPlaytimeInSeconds = getConfig().getMinimumPlaytimeInSeconds();
         if (playtimeInSeconds < minimumPlaytimeInSeconds) {
             StringBuilder formattedTime = getFormattedTime(minimumPlaytimeInSeconds, playtimeInSeconds);
