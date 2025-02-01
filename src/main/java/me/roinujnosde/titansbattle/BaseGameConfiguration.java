@@ -97,8 +97,8 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     protected Double borderDamage = 5.0;
     @Path("cancel-block-interact")
     protected Boolean cancelBlockInteract = true;
-    @Path("minimum.playtime")
-    protected int minimunPlaytime = 86400;
+    @Path("minimum-playtime")
+    protected int minimumPlaytimeInSeconds = 21600;
 
     public @NotNull FileConfiguration getFileConfiguration() {
         if (fileConfiguration == null) {
@@ -317,7 +317,7 @@ public abstract class BaseGameConfiguration implements ConfigurationSerializable
     }
 
     public int getMinimumPlaytimeInSeconds() {
-        return minimunPlaytime;
+        return minimumPlaytimeInSeconds;
     }
 
     public enum Prize implements ConfigurationSerializable {
