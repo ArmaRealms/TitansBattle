@@ -21,6 +21,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Statistic;
 import org.bukkit.WorldBorder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -138,6 +140,17 @@ public abstract class BaseGame {
             plugin.debug(String.format("onJoin() -> player %s %s == null", warrior.getName(), warrior.getUniqueId()));
             return;
         }
+
+
+        int playtimeInSeconds = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20;
+        int minimumPlaytimeInSeconds = getConfig().getMinimumPlaytimeInSeconds();
+        if (playtimeInSeconds < minimumPlaytimeInSeconds) {
+            plugin.debug(String.format("Player %s has not enough playtime: %d < %d", player.getName(), playtimeInSeconds, minimumPlaytimeInSeconds));
+            StringBuilder formattedTime = getFormattedTime(minimumPlaytimeInSeconds, playtimeInSeconds);
+            player.sendMessage(getLang("not.enough.playtime", formattedTime.toString()));
+            return;
+        }
+
         if (!teleport(warrior, getConfig().getLobby())) {
             plugin.debug(String.format("Player %s is dead: %s", player, player.isDead()), false);
             player.sendMessage(getLang("teleport.error"));
@@ -627,6 +640,25 @@ public abstract class BaseGame {
             color = YELLOW;
         }
         return color;
+    }
+
+    private @NotNull StringBuilder getFormattedTime(int minimumPlaytimeInSeconds, int playerPlaytimeInSeconds) {
+        int remainingSeconds = minimumPlaytimeInSeconds - playerPlaytimeInSeconds;
+        Duration duration = Duration.ofSeconds(remainingSeconds);
+        StringBuilder formattedTime = new StringBuilder();
+
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
+
+        if (hours > 0) {
+            formattedTime.append(String.format("%02dh ", hours));
+        }
+        if (minutes > 0 || hours > 0) {
+            formattedTime.append(String.format("%02dm ", minutes));
+        }
+        formattedTime.append(String.format("%02ds", seconds));
+        return formattedTime;
     }
 
     public class LobbyAnnouncementTask extends BukkitRunnable {
